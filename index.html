@@ -57,7 +57,7 @@
     function newGame() {
       document.getElementById("result").textContent = "";
       document.getElementById("guess").value = "";
-      timeLeft = 10;
+      timeLeft = 20;
       clearInterval(timerInterval);
 
       currentGame = games[Math.floor(Math.random() * games.length)];
