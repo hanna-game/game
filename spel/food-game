@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Gissa landet från maten</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    img {
+      width: 300px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .hidden {
+      display: none;
+    }
+    #timer {
+      font-size: 20px;
+      font-weight: bold;
+      color: #dc3545;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🍽️ Gissa landet från maten</h1>
+<p id="score">Poäng: 0</p>
+<p id="timer">Tid kvar: 20s</p>
+<img id="food-image" src="" alt="Maträtt">
+<div class="options" id="options"></div>
+<p id="result" class="hidden"></p>
+<button id="next-btn" class="hidden">Nästa fråga</button>
+
+<script>
+  const questions = [
+    {
+      image: "https://upload.wikimedia.org/wikipedia/commons/6/60/Sushi_platter.jpg",
+      correct: "Japan",
+      options: ["Japan", "Kina", "Sydkorea", "Thailand"]
+    },
+    {
+      image: "https://upload.wikimedia.org/wikipedia/commons/9/94/Tacos_de_carnitas.JPG",
+      correct: "Mexiko",
+      options: ["Mexiko", "Spanien", "Brasilien", "Argentina"]
+    },
+    {
+      image: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Croissant-Petr-Kratochvil.jpg",
+      correct: "Frankrike",
+      options: ["Italien", "Frankrike", "Belgien", "Österrike"]
+    },
+    {
+      image: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Bratwurst_with_potato_salad.jpg",
+      correct: "Tyskland",
+      options: ["Nederländerna", "Tyskland", "Schweiz", "Polen"]
+    },
+    {
+      image: "https://upload.wikimedia.org/wikipedia/commons/8/83/Pizza_margherita_stu_spivack.jpg",
+      correct: "Italien",
+      options: ["USA", "Italien", "Spanien", "Grekland"]
+    }
+  ];
+
+  let currentQuestion = 0;
+  let score = 0;
+  let timeLeft = 20;
+  let timerInterval;
+
+  const imageEl = document.getElementById("food-image");
+  const optionsEl = document.getElementById("options");
+  const scoreEl = document.getElementById("score");
+  const timerEl = document.getElementById("timer");
+  const resultEl = document.getElementById("result");
+  const nextBtn = document.getElementById("next-btn");
+
+  function loadQuestion() {
+    const q = questions[currentQuestion];
+    imageEl.src = q.image;
+    optionsEl.innerHTML = "";
+    resultEl.classList.add("hidden");
+    nextBtn.classList.add("hidden");
+
+    q.options.forEach(option => {
+      const btn = document.createElement("button");
+      btn.textContent = option;
+      btn.onclick = () => selectAnswer(option);
+      optionsEl.appendChild(btn);
+    });
+
+    startTimer();
+  }
+
+  function selectAnswer(selected) {
+    clearInterval(timerInterval);
+    const correct = questions[currentQuestion].correct;
+    if (selected === correct) {
+      score++;
+      resultEl.textContent = "✅ Rätt!";
+    } else {
+      resultEl.textContent = `❌ Fel! Rätt svar: ${correct}`;
+    }
+    resultEl.classList.remove("hidden");
+    scoreEl.textContent = `Poäng: ${score}`;
+    nextBtn.classList.remove("hidden");
+    disableOptions();
+  }
+
+  function disableOptions() {
+    const buttons = document.querySelectorAll(".options button");
+    buttons.forEach(btn => btn.disabled = true);
+  }
+
+  function startTimer() {
+    timeLeft = 20;
+    timerEl.textContent = `Tid kvar: ${timeLeft}s`;
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = `Tid kvar: ${timeLeft}s`;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        selectAnswer(""); // räknas som inget svar = fel
+      }
+    }, 1000);
+  }
+
+  nextBtn.onclick = () => {
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+      loadQuestion();
+    } else {
+      endGame();
+    }
+  };
+
+  function endGame() {
+    imageEl.classList.add("hidden");
+    optionsEl.classList.add("hidden");
+    timerEl.classList.add("hidden");
+    nextBtn.classList.add("hidden");
+    resultEl.classList.remove("hidden");
+    resultEl.textContent = `🎉 Spelet är slut! Du fick ${score} av ${questions.length} rätt.`;
+  }
+
+  // Starta spelet
+  loadQuestion();
+</script>
+
+</body>
+</html>
