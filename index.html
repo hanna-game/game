@@ -1,10 +1,95 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Emoji-gissningsspel 🎮</title>
-  </head>
-  <body>
-    <h1>Hej världen!</h1>
-    <p>Snart kommer mitt spel här!</p>
-  </body>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎮 Emoji-spelgissning</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f0f0f0;
+    }
+    .emoji {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    #timer {
+      font-size: 1.5rem;
+      color: #e74c3c;
+    }
+    input {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎮 Gissa Spelet med Emojis!</h1>
+  <div class="emoji" id="emoji">🎲</div>
+  <div id="timer">⏳ 10</div>
+  <input type="text" id="guess" placeholder="Skriv spelets namn..." />
+  <br/>
+  <button onclick="checkGuess()">Gissa</button>
+  <p id="result"></p>
+  <button onclick="newGame()">🔄 Ny omgång</button>
+
+  <script>
+    const games = [
+      { emoji: "🕴️🔫🕶️💥🚗🏙️", answer: "GTA V" },
+      { emoji: "🧟‍♂️🎒🔫👧👨", answer: "The Last of Us" },
+      { emoji: "🚗🏁🌄🛞🔥", answer: "Forza Horizon" },
+      { emoji: "🦇🏙️👊🦹‍♂️🔦", answer: "Batman" },
+      { emoji: "👨‍🚀🌌💔🪐🧬", answer: "Mass Effect" }
+    ];
+
+    let currentGame;
+    let timeLeft = 10;
+    let timerInterval;
+
+    function newGame() {
+      document.getElementById("result").textContent = "";
+      document.getElementById("guess").value = "";
+      timeLeft = 10;
+      clearInterval(timerInterval);
+
+      currentGame = games[Math.floor(Math.random() * games.length)];
+      document.getElementById("emoji").textContent = currentGame.emoji;
+
+      document.getElementById("timer").textContent = `⏳ ${timeLeft}`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = `⏳ ${timeLeft}`;
+        if (timeLeft === 0) {
+          clearInterval(timerInterval);
+          document.getElementById("result").textContent = `⛔ Tiden är ute! Rätt svar var: ${currentGame.answer}`;
+        }
+      }, 1000);
+    }
+
+    function checkGuess() {
+      const userGuess = document.getElementById("guess").value.trim().toLowerCase();
+      if (userGuess && currentGame) {
+        clearInterval(timerInterval);
+        const correct = currentGame.answer.toLowerCase();
+        if (correct.includes(userGuess)) {
+          document.getElementById("result").textContent = "✅ Rätt gissat!";
+        } else {
+          document.getElementById("result").textContent = `❌ Fel! Rätt svar var: ${currentGame.answer}`;
+        }
+      }
+    }
+
+    // Starta första spelet
+    newGame();
+  </script>
+</body>
 </html>
+
