@@ -86,7 +86,7 @@
       options: ["Nederländerna", "Tyskland", "Schweiz", "Polen"]
     },
     {
-      image: "https://upload.wikimedia.org/wikipedia/commons/8/83/Pizza_margherita_stu_spivack.jpg",
+      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Pizza_Margherita_stu_spivack.jpg/800px-Pizza_Margherita_stu_spivack.jpg",
       correct: "Italien",
       options: ["USA", "Italien", "Spanien", "Grekland"]
     }
@@ -150,7 +150,7 @@
       timerEl.textContent = `Tid kvar: ${timeLeft}s`;
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
-        selectAnswer(""); // räknas som inget svar = fel
+        selectAnswer(""); // ingen gissning = fel
       }
     }, 1000);
   }
@@ -179,3 +179,4 @@
 
 </body>
 </html>
+
