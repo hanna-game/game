@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Fun Fact Quiz</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 700px;
+      margin: 50px auto;
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    .question { font-size: 1.2em; margin-bottom: 10px; }
+    .answers button {
+      display: block;
+      margin: 8px 0;
+      padding: 10px;
+      width: 100%;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .answers button.correct { background-color: #c8e6c9; }
+    .answers button.incorrect { background-color: #ffcdd2; }
+    #nextBtn { margin-top: 20px; }
+    #score { font-size: 1.4em; font-weight: bold; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>🧠 Fun Fact Quiz</h1>
+  <div id="quiz">
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <button id="nextBtn" onclick="nextQuestion()" disabled>Nästa fråga</button>
+  </div>
+  <div id="score" style="display:none;"></div>
+
+  <script>
+    const questions = [
+      {
+        question: "1. Vilken annan uppfinnare gav sitt namn åt den moderna dragkedjan?",
+        options: ["Levi Strauss", "Gideon Sundback", "Elias Howe", "Otto Zipmann"],
+        correct: 1
+      },
+      {
+        question: "2. Vilken Alfred uppfann dynamiten?",
+        options: ["Alfred Hitchcock", "Alfred Nobel", "Alfred Einstein", "Alfred Diesel"],
+        correct: 1
+      },
+      {
+        question: "3. Vem ligger bakom bilmärket Ford?",
+        options: ["Gerald Ford", "Henry Ford", "Tom Ford", "John Ford"],
+        correct: 1
+      },
+      {
+        question: "4. Vem uppfann espressomaskinen och grundade ett kaffeimperium?",
+        options: ["Luigi Lavazza", "Giuseppe Nespresso", "Marco Barista", "Antonio Arabica"],
+        correct: 0
+      },
+      {
+        question: "5. Vem gav namn åt ett lager som revolutionerade industrin?",
+        options: ["Anders Celsius", "Gustav de Laval", "Sven Wingquist", "Lars SKFsson"],
+        correct: 2
+      },
+      {
+        question: "6. Vem grundade Puma?",
+        options: ["Rudolf Dassler", "Puma Karlsson", "Arne Reebok", "Otto Nike"],
+        correct: 0
+      },
+      {
+        question: "7. Vem skapade bakverket Brownies?",
+        options: ["Eliza Brown", "Bertha Palmer", "Julia Baker", "Mary Betty"],
+        correct: 1
+      },
+      {
+        question: "8. Vem ligger bakom Bechamelsås?",
+        options: ["Louis de Béchamel", "Antoine Bolognese", "Henri Carbonara", "Claude Alfredo"],
+        correct: 0
+      },
+      {
+        question: "9. Vem har en elektrisk måttenhet uppkallad efter sig?",
+        options: ["Thomas Watt", "James Volt", "Alessandro Ohm", "James Watt"],
+        correct: 3
+      },
+      {
+        question: "10. Vem uppfann kulspetspennan (Biro)?",
+        options: ["George Pilot", "Marcel Parker", "László Bíró", "John Sharpie"],
+        correct: 2
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("question").innerText = q.question;
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = "";
+
+      q.options.forEach((option, i) => {
+        const btn = document.createElement("button");
+        btn.innerText = option;
+        btn.onclick = () => selectAnswer(i, btn);
+        answersDiv.appendChild(btn);
+      });
+
+      document.getElementById("nextBtn").disabled = true;
+    }
+
+    function selectAnswer(index, btn) {
+      const q = questions[currentQuestion];
+      const buttons = document.querySelectorAll("#answers button");
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (i === q.correct) {
+          b.classList.add("correct");
+        } else if (b === btn) {
+          b.classList.add("incorrect");
+        }
+      });
+
+      if (index === q.correct) score++;
+      document.getElementById("nextBtn").disabled = false;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        document.getElementById("quiz").style.display = "none";
+        document.getElementById("score").style.display = "block";
+        document.getElementById("score").innerText = `Du fick ${score} av ${questions.length} rätt! 🎉`;
+      }
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
