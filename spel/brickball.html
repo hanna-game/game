@@ -184,4 +184,99 @@
                     ctx.rect(brickX, brickY, brickWidth, brickHeight);
 
                     // Färg baserat på "HP" eller träffräknare (mer skadade = annan färg)
-                    if (bricks[c][r
+                    if (bricks[c][r].status === 1) { // Standardblock
+                        ctx.fillStyle = "#A0522D"; // Brun färg för block
+                    } else if (bricks[c][r].status === 2) { // Starkare block
+                         ctx.fillStyle = "#8B4513"; // Mörkare brun
+                    }
+                    // Du kan lägga till fler färger här baserat på b.hitCount
+
+                    ctx.strokeStyle = "#5A2C00"; // Mörkare brun kant
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.closePath();
+                }
+            }
+        }
+    }
+
+    // Rita poäng
+    function drawScore() {
+        ctx.font = "20px 'Press Start 2P'"; // Använd pixel-font
+        ctx.fillStyle = "#FFD700"; // Guldgul färg
+        ctx.fillText("POÄNG: " + score, 10, 30);
+    }
+
+    // Rita liv
+    function drawLives() {
+        ctx.font = "20px 'Press Start 2P'";
+        ctx.fillStyle = "#FF0000"; // Röd färg
+        ctx.fillText("LIV: " + lives, canvas.width - 100, 30);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Rensa canvas
+        drawBackground(); // Rita bakgrunden först
+        drawBricks();
+        drawBall();
+        drawPaddle();
+        drawScore();
+        drawLives(); // Rita liv
+        collisionDetection();
+
+        // Bollens rörelse och kollision med väggar
+        if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+            dx = -dx;
+        }
+        if (y + dy < ballRadius) {
+            dy = -dy;
+        } else if (y + dy > canvas.height - ballRadius - paddleHeight) { // Kollision med paddelns höjd
+            if (x > paddleX && x < paddleX + paddleWidth) {
+                // Kollision med paddeln, justera vinkel beroende på var den träffar
+                const hitPoint = x - (paddleX + paddleWidth / 2); // -paddleWidth/2 till +paddleWidth/2
+                dx = hitPoint * 0.15; // Ju längre från mitten, desto mer sidleds
+                dy = -dy;
+            } else {
+                lives--; // Förlora ett liv
+                if (lives === 0) {
+                    alert("GAME OVER! Mario förlorade sina liv!");
+                    document.location.reload();
+                } else {
+                    // Återställ boll och paddel
+                    x = canvas.width / 2;
+                    y = canvas.height - 50;
+                    dx = 3;
+                    dy = -3;
+                    paddleX = (canvas.width - paddleWidth) / 2;
+                }
+            }
+        }
+
+        // Paddelrörelse
+        if (rightPressed && paddleX < canvas.width - paddleWidth) {
+            paddleX += 7; // Snabbare paddel
+        } else if (leftPressed && paddleX > 0) {
+            paddleX -= 7; // Snabbare paddel
+        }
+
+        x += dx;
+        y += dy;
+        requestAnimationFrame(draw);
+    }
+
+    // Initiera vissa tegelstenar med högre "HP" (status 2)
+    for (let c = 0; c < brickColumnCount; c++) {
+        for (let r = 0; r < brickRowCount; r++) {
+            if (r % 2 === 0) { // Varannan rad får status 2
+                bricks[c][r].status = 1;
+            } else {
+                bricks[c][r].status = 2; // Dessa block kräver 2 träffar
+            }
+        }
+    }
+
+    draw(); // Starta spelet
+</script>
+</body>
+</html>
