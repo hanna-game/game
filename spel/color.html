@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Färg efter Nummer Målarbok</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        /* Färgpaletten */
+        #color-palette {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%; /* Rundade färgalternativ */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: 3px solid transparent; /* Kant som ändras vid aktiv färg */
+            transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #fff; /* Färg på siffran */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+        }
+
+        .color-option.active {
+            border-color: #3498db; /* Blå kant runt aktiv färg */
+            transform: scale(1.1);
+        }
+
+        /* Målarområdet (rutnätet) */
+        #drawing-area {
+            display: grid;
+            /* Detta kommer att sättas av JavaScript beroende på rutans storlek */
+            /* grid-template-columns: repeat(antal_kolumner, storlek_ruta); */
+            border: 2px solid #ccc;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            overflow: hidden; /* För att inte rutorna ska sticka ut */
+            margin-top: 20px;
+        }
+
+        .cell {
+            width: 30px; /* Standardstorlek på varje ruta */
+            height: 30px;
+            border: 1px solid #eee; /* Tunna gråa linjer mellan rutorna */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #888; /* Färg på siffran i rutan */
+            cursor: pointer;
+            transition: background-color 0.1s ease-in-out;
+        }
+
+        .cell.colored {
+            color: transparent; /* Dölj siffran när rutan är färgad */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎨 Färg efter Nummer Målarbok</h1>
+
+    <div id="color-palette">
+        </div>
+
+    <div id="drawing-area">
+        </div>
+
+    <script>
+        // 1. Definition av färger och mönster
+        const colors = {
+            1: '#FF0000', // Röd
+            2: '#0000FF', // Blå
+            3: '#00FF00', // Grön
+            4: '#FFFF00', // Gul
+            5: '#FFA500', // Orange
+            6: '#800080'  // Lila
+        };
+
+        // Definiera ett mönster för "teckningen"
+        // Varje nummer representerar en färg. 0 betyder "tom/ofärgad".
+        // Detta är ett enkelt 10x10 mönster för en "svamp" eller liknande
+        const drawingPattern = [
+            [0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,1,1,0,0,0,0],
+            [0,0,0,1,1,1,1,0,0,0],
+            [0,0,1,1,1,1,1,1,0,0],
+            [0,1,1,1,1,1,1,1,1,0],
+            [0,0,0,3,3,3,3,0,0,0],
+            [0,0,3,3,3,3,3,3,0,0],
+            [0,0,3,3,3,3,3,3,0,0],
+            [0,0,0,3,3,3,3,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0]
+        ];
+
+        const rows = drawingPattern.length;
+        const cols = drawingPattern[0].length;
+        const cellSize = 30; // Storlek i pixlar för varje ruta
+
+        let activeColorNumber = null; // Det nummer som är aktivt för målning
+
+        const colorPaletteEl = document.getElementById('color-palette');
+        const drawingAreaEl = document.getElementById('drawing-area');
+
+        // 2. Skapa färgpaletten
+        function createColorPalette() {
+            for (const num in colors) {
+                const colorOption = document.createElement('div');
+                colorOption.classList.add('color-option');
+                colorOption.style.backgroundColor = colors[num];
+                colorOption.textContent = num;
+                colorOption.dataset.colorNumber = num; // Lagra numret som data-attribut
+
+                colorOption.addEventListener('click', () => {
+                    // Ta bort 'active' klassen från tidigare vald färg
+                    const currentActive = document.querySelector('.color-option.active');
+                    if (currentActive) {
+                        currentActive.classList.remove('active');
+                    }
+                    // Sätt 'active' klassen på den klickade färgen
+                    colorOption.classList.add('active');
+                    activeColorNumber = parseInt(num); // Uppdatera aktiv färg
+                });
+                colorPaletteEl.appendChild(colorOption);
+            }
+            // Välj första färgen som standard
+            colorPaletteEl.children[0].click();
+        }
+
+        // 3. Skapa målarområdet (rutnätet)
+        function createDrawingArea() {
+            drawingAreaEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+            drawingAreaEl.style.width = `${cols * cellSize + 2 * (cols - 1)}px`; // Justera bredden med border
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.dataset.expectedColor = drawingPattern[r][c]; // Lagra vilket nummer den ska ha
+
+                    if (drawingPattern[r][c] !== 0) {
+                        cell.textContent = drawingPattern[r][c]; // Visa numret i rutan
+                    }
+
+                    cell.addEventListener('click', () => {
+                        // Kontrollera om rutan redan är färgad
+                        if (cell.classList.contains('colored')) {
+                            return; // Gör inget om den redan är färgad
+                        }
+
+                        // Om den aktiva färgen matchar det förväntade numret för rutan
+                        if (activeColorNumber === parseInt(cell.dataset.expectedColor)) {
+                            cell.style.backgroundColor = colors[activeColorNumber];
+                            cell.classList.add('colored'); // Markera som färgad
+                            cell.textContent = ''; // Ta bort siffran
+                        } else if (activeColorNumber !== null) {
+                            // Feedback om fel färg
+                            console.log(`Fel färg för ruta (${r},${c}). Förväntade ${cell.dataset.expectedColor}, valde ${activeColorNumber}`);
+                            // Du kan lägga till visuell feedback här, t.ex. en röd blixt
+                            cell.style.transition = 'none'; // Stäng av transition temporärt
+                            cell.style.backgroundColor = '#ffcccc'; // Lätt röd som felindikation
+                            setTimeout(() => {
+                                cell.style.backgroundColor = ''; // Återgå till original
+                                cell.style.transition = 'background-color 0.1s ease-in-out'; // Slå på transition igen
+                            }, 300);
+                        }
+                    });
+                    drawingAreaEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Initiera spelet
+        createColorPalette();
+        createDrawingArea();
+    </script>
+</body>
+</html>
