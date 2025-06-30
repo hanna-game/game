@@ -2,17 +2,25 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <title>🎮 Hannas Spelportal</title>
+    <title>🎮 Jakobs Spelportal</title>
     <style>
+        /*
+         * CSS för att fylla hela sidan dynamiskt
+         * VIKTIGT: Sätt html och body till 100% höjd
+         */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* Detta fixar problemet med den tomma ytan */
+            overflow: hidden; /* Döljer scrollbar */
+        }
+        
         /* CSS för Matrix-bakgrund */
         body {
             font-family: sans-serif;
             text-align: center;
-            padding: 3rem;
-            margin: 0;
-            overflow: hidden; /* Dölj scrollbar vid animation */
-            position: relative; /* Nödvändigt för canvaspositionering */
-            color: #fff; /* Vit textfärg för bättre kontrast */
+            position: relative;
+            color: #fff;
         }
         canvas {
             position: absolute;
@@ -23,31 +31,64 @@
             z-index: -1; /* Placera canvas bakom allt annat innehåll */
         }
 
-        /* Stil för länkarna och rubriken */
+        /*
+         * Stil för innehåll och layout
+         * Använd flexbox för att centrera innehållet vertikalt och horisontellt
+         */
         .content {
             position: relative;
-            z-index: 1; /* Se till att innehållet ligger ovanpå canvas */
+            z-index: 1;
+            padding: 3rem;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centrerar innehållet vertikalt */
+            align-items: center; /* Centrerar innehållet horisontellt */
         }
         h1, p {
             color: #0f0; /* Ljusgrön färg för rubrik och text */
             text-shadow: 0 0 10px #0f0, 0 0 20px #0f0; /* Glödeffekt */
         }
+
+        /*
+         * NY STIL FÖR KNAPPARNA - Mer i team med Matrix-temat
+         */
         a {
             display: inline-block;
             padding: 1rem 2rem;
             margin: 1rem;
-            background-color: rgba(52, 152, 219, 0.7); /* Halvtransparent bakgrund */
-            color: white;
+            
+            /* Bakgrundsfärg: mörk grön, transparent */
+            background-color: rgba(0, 50, 0, 0.7); 
+            
+            /* Textfärg och dekoration */
+            color: #0f0;
             text-decoration: none;
+            
+            /* Kant och skugga för glödeffekt */
+            border: 2px solid #0f0; 
+            box-shadow: 0 0 15px #0f0, 0 0 20px #0f0 inset; /* Glöd utåt och inåt */
+            
             border-radius: 8px;
             font-size: 1.2rem;
-            transition: background-color 0.3s ease;
-            border: 2px solid #0f0; /* Grön kant */
-            box-shadow: 0 0 10px #0f0; /* Glödeffekt på länkar */
+            font-weight: bold; /* Tjockare text */
+            
+            /* Mjuk övergång vid hover */
+            transition: all 0.3s ease; 
         }
         a:hover {
-            background-color: rgba(41, 128, 185, 0.9); /* Mörkare vid hover */
-            box-shadow: 0 0 20px #0f0, 0 0 30px #0f0; /* Mer glöd vid hover */
+            /* Ljusare bakgrund vid hover */
+            background-color: rgba(0, 150, 0, 0.9);
+            
+            /* Mer intensiv glöd vid hover */
+            box-shadow: 0 0 25px #0f0, 0 0 30px #0f0, 0 0 40px #0f0 inset; 
+            
+            /* Textfärg kan bli vit för kontrast */
+            color: #fff;
+            
+            /* Skala upp knappen lite vid hover */
+            transform: scale(1.05); 
         }
     </style>
 </head>
@@ -70,9 +111,14 @@
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Ställ in storleken på canvas
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // Funktion för att ställa in storleken på canvas baserat på fönsterstorlek
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        // Kör funktionen direkt vid laddning
+        setCanvasSize();
 
         const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#$%^&*()_+-=~`[]{}\\|:;"\',.<>/?';
         const columns = Math.floor(canvas.width / 15); // Antal kolumner baserat på teckenstorlek
@@ -100,7 +146,7 @@
                 ctx.fillText(text, x, y);
 
                 // Återställ droppen när den når botten eller slumpmässigt
-                if (y > canvas.height && Math.random() > 0.975) {
+                if (y * 15 > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
 
@@ -110,8 +156,15 @@
 
         // Uppdatera canvas storlek vid fönsterändring
         window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            setCanvasSize(); // Använd den nya funktionen
+            // Återställ dropparna för att fylla den nya bredden
+            const newColumns = Math.floor(canvas.width / 15);
+            drops.length = newColumns;
+            for (let i = 0; i < newColumns; i++) {
+                if (drops[i] === undefined) {
+                    drops[i] = 0;
+                }
+            }
         });
 
         // Starta animationen
@@ -119,4 +172,3 @@
     </script>
 </body>
 </html>
-
