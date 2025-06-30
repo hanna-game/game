@@ -1,175 +1,187 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <title>Brick Ball</title>
-  <style>
-    body {
-      background: #111;
-      margin: 0;
-      overflow: hidden;
-    }
-    canvas {
-      display: block;
-      margin: auto;
-      background: #222;
-      border: 2px solid #fff;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Super Mario Brick Breaker!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #87CEEB, #6A5ACD); /* Blå himmel gradient */
+            margin: 0;
+            overflow: hidden;
+            display: flex; /* Använd flexbox för att centrera canvas */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Säkerställ att body fyller hela viewport-höjden */
+        }
+        canvas {
+            display: block;
+            /* Ta bort standard bakgrund, vi ritar den med JS */
+            /* background: #222; */
+            border: 5px solid #5A2C00; /* Tjock, brun "jord"-ram */
+            border-radius: 10px; /* Rundade hörn på ramen */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Liten skugga */
+        }
+    </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="480" height="320"></canvas>
-<script>
-  const canvas = document.getElementById("gameCanvas");
-  const ctx = canvas.getContext("2d");
+<canvas id="gameCanvas" width="640" height="480"></canvas> <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-  // Boll
-  let x = canvas.width / 2;
-  let y = canvas.height - 30;
-  let dx = 2;
-  let dy = -2;
-  const ballRadius = 10;
+    // Boll (nu en gul Super Star)
+    let x = canvas.width / 2;
+    let y = canvas.height - 50; // Justera startposition
+    let dx = 3; // Öka hastigheten lite
+    let dy = -3; // Öka hastigheten lite
+    const ballRadius = 12; // Större boll
 
-  // Paddle
-  const paddleHeight = 10;
-  const paddleWidth = 75;
-  let paddleX = (canvas.width - paddleWidth) / 2;
+    // Paddle (Mario-röd)
+    const paddleHeight = 15; // Tjockare paddel
+    const paddleWidth = 100; // Bredare paddel
+    let paddleX = (canvas.width - paddleWidth) / 2;
 
-  // Tangenttryckning
-  let rightPressed = false;
-  let leftPressed = false;
+    // Tangenttryckning
+    let rightPressed = false;
+    let leftPressed = false;
 
-  // Bricks
-  const brickRowCount = 3;
-  const brickColumnCount = 5;
-  const brickWidth = 75;
-  const brickHeight = 20;
-  const brickPadding = 10;
-  const brickOffsetTop = 30;
-  const brickOffsetLeft = 30;
+    // Bricks (Mario-block)
+    const brickRowCount = 5; // Fler rader
+    const brickColumnCount = 8; // Fler kolumner
+    const brickWidth = 65; // Justera storlek
+    const brickHeight = 25; // Justera storlek
+    const brickPadding = 8; // Mindre mellanrum
+    const brickOffsetTop = 40; // Flytta ner lite
+    const brickOffsetLeft = 35; // Flytta in lite
 
-  const bricks = [];
-  for (let c = 0; c < brickColumnCount; c++) {
-    bricks[c] = [];
-    for (let r = 0; r < brickRowCount; r++) {
-      bricks[c][r] = { x: 0, y: 0, status: 1 };
-    }
-  }
-
-  let score = 0;
-
-  // Eventlyssnare
-  document.addEventListener("keydown", keyDownHandler);
-  document.addEventListener("keyup", keyUpHandler);
-
-  function keyDownHandler(e) {
-    if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
-    else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
-  }
-
-  function keyUpHandler(e) {
-    if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
-    else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
-  }
-
-  function collisionDetection() {
+    const bricks = [];
     for (let c = 0; c < brickColumnCount; c++) {
-      for (let r = 0; r < brickRowCount; r++) {
-        const b = bricks[c][r];
-        if (b.status === 1) {
-          if (
-            x > b.x &&
-            x < b.x + brickWidth &&
-            y > b.y &&
-            y < b.y + brickHeight
-          ) {
-            dy = -dy;
-            b.status = 0;
-            score++;
-            if (score === brickRowCount * brickColumnCount) {
-              alert("🎉 Du vann!");
-              document.location.reload();
+        bricks[c] = [];
+        for (let r = 0; r < brickRowCount; r++) {
+            bricks[c][r] = { x: 0, y: 0, status: 1, hitCount: 0 }; // Lade till hitCount för olika färger
+        }
+    }
+
+    let score = 0;
+    let lives = 3; // Mario har liv!
+
+    // Eventlyssnare
+    document.addEventListener("keydown", keyDownHandler);
+    document.addEventListener("keyup", keyUpHandler);
+    document.addEventListener("mousemove", mouseMoveHandler); // För muskontroll
+
+    function keyDownHandler(e) {
+        if (e.key === "Right" || e.key === "ArrowRight") rightPressed = true;
+        else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = true;
+    }
+
+    function keyUpHandler(e) {
+        if (e.key === "Right" || e.key === "ArrowRight") rightPressed = false;
+        else if (e.key === "Left" || e.key === "ArrowLeft") leftPressed = false;
+    }
+
+    function mouseMoveHandler(e) {
+        const relativeX = e.clientX - canvas.offsetLeft;
+        if (relativeX > 0 && relativeX < canvas.width) {
+            paddleX = relativeX - paddleWidth / 2;
+        }
+    }
+
+    function collisionDetection() {
+        for (let c = 0; c < brickColumnCount; c++) {
+            for (let r = 0; r < brickRowCount; r++) {
+                const b = bricks[c][r];
+                if (b.status >= 1) { // Kontrollera om tegelstenen är aktiv (kan ha flera HP)
+                    if (
+                        x > b.x &&
+                        x < b.x + brickWidth &&
+                        y > b.y &&
+                        y < b.y + brickHeight
+                    ) {
+                        dy = -dy; // Byt riktning på bollen
+                        b.hitCount++; // Öka träffräknaren
+
+                        // Olika HP för tegelstenar
+                        if (b.status === 1) { // Standard tegelsten
+                            b.status = 0;
+                            score += 10; // Poäng för att förstöra block
+                        } else if (b.status === 2 && b.hitCount >= 1) { // Starkare tegelsten
+                             b.status = 0;
+                             score += 20;
+                        }
+                        // Du kan lägga till fler "HP" nivåer för tegelstenarna här
+
+                        if (score === brickRowCount * brickColumnCount * 10) { // Poäng för att vinna baserat på nya poängen
+                            alert("🎉 GRATTIS! DU VANN SUPER MARIO BRICK BREAKER!");
+                            document.location.reload();
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
-  }
 
-  function drawBall() {
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
-    ctx.fill();
-    ctx.closePath();
-  }
+    // Rita himmel och moln som bakgrund på canvas
+    function drawBackground() {
+        // Blå himmel
+        ctx.beginPath();
+        ctx.rect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#87CEEB"; // Ljusblå himmel
+        ctx.fill();
+        ctx.closePath();
 
-  function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#0ff";
-    ctx.fill();
-    ctx.closePath();
-  }
-
-  function drawBricks() {
-    for (let c = 0; c < brickColumnCount; c++) {
-      for (let r = 0; r < brickRowCount; r++) {
-        if (bricks[c][r].status === 1) {
-          const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
-          const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
-          bricks[c][r].x = brickX;
-          bricks[c][r].y = brickY;
-          ctx.beginPath();
-          ctx.rect(brickX, brickY, brickWidth, brickHeight);
-          ctx.fillStyle = "#f33";
-          ctx.fill();
-          ctx.closePath();
+        // Enkel moln
+        function drawCloud(cx, cy, scale = 1) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, 20 * scale, 0, Math.PI * 2, true);
+            ctx.arc(cx + 30 * scale, cy, 25 * scale, 0, Math.PI * 2, true);
+            ctx.arc(cx + 50 * scale, cy + 10 * scale, 20 * scale, 0, Math.PI * 2, true);
+            ctx.arc(cx + 20 * scale, cy + 15 * scale, 25 * scale, 0, Math.PI * 2, true);
+            ctx.fillStyle = "#FFFFFF"; // Vit
+            ctx.fill();
+            ctx.closePath();
         }
-      }
-    }
-  }
-
-  function drawScore() {
-    ctx.font = "16px Arial";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("Poäng: " + score, 8, 20);
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBricks();
-    drawBall();
-    drawPaddle();
-    drawScore();
-    collisionDetection();
-
-    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-      dx = -dx;
-    }
-    if (y + dy < ballRadius) {
-      dy = -dy;
-    } else if (y + dy > canvas.height - ballRadius) {
-      if (x > paddleX && x < paddleX + paddleWidth) {
-        dy = -dy;
-      } else {
-        alert("💥 Spelet är över!");
-        document.location.reload();
-      }
+        drawCloud(50, 50, 0.8);
+        drawCloud(400, 100, 1.2);
+        drawCloud(180, 20, 0.9);
+        drawCloud(550, 300, 1.0);
     }
 
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-      paddleX += 5;
-    } else if (leftPressed && paddleX > 0) {
-      paddleX -= 5;
+    // Rita bollen (Super Star)
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#FFD700"; // Guldgul färg för stjärnan
+        ctx.shadowColor = "#FFD700"; // Glöd för stjärnan
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.closePath();
+        ctx.shadowBlur = 0; // Återställ shadowblur
     }
 
-    x += dx;
-    y += dy;
-    requestAnimationFrame(draw);
-  }
+    // Rita paddeln (Mario-röd)
+    function drawPaddle() {
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight); // Flytta upp paddeln lite från botten
+        ctx.fillStyle = "#FF0000"; // Stark röd
+        ctx.strokeStyle = "#8B0000"; // Mörk röd kant
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fill();
+        ctx.closePath();
+    }
 
-  draw();
-</script>
-</body>
-</html>
+    // Rita tegelstenarna (Mario-block)
+    function drawBricks() {
+        for (let c = 0; c < brickColumnCount; c++) {
+            for (let r = 0; r < brickRowCount; r++) {
+                if (bricks[c][r].status >= 1) {
+                    const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                    const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                    bricks[c][r].x = brickX;
+                    bricks[c][r].y = brickY;
+                    ctx.beginPath();
+                    ctx.rect(brickX, brickY, brickWidth, brickHeight);
+
+                    // Färg baserat på "HP" eller träffräknare (mer skadade = annan färg)
+                    if (bricks[c][r
