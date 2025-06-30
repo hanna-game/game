@@ -136,3 +136,351 @@
             margin-top: 25px;
             font-size: 1.5em;
             color: #FFC107; /* Orange för seger */
+            text-shadow: 2px 2px 0 #000;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>🎨 TV-Spels Målarbok: Färg efter Nummer</h1>
+    <h2 id="level-indicator">Nivå 1</h2>
+
+    <div id="color-palette">
+        </div>
+
+    <div id="drawing-area">
+        </div>
+
+    <div id="controls">
+        <button id="prev-level-btn" disabled>← Föregående nivå</button>
+        <button id="next-level-btn">Nästa nivå →</button>
+    </div>
+
+    <p id="level-completion-message"></p>
+
+    <script>
+        // 1. Definition av gemensamma färger (kan variera per nivå om så önskas)
+        const commonColors = {
+            1: '#FF0000', // Röd
+            2: '#0000FF', // Blå
+            3: '#00FF00', // Grön
+            4: '#FFFF00', // Gul
+            5: '#FFA500', // Orange
+            6: '#A52A2A', // Brun
+            7: '#800080', // Lila
+            8: '#008080', // Turkost
+            9: '#FFFFFF', // Vit
+            10: '#000000' // Svart
+        };
+
+        // 2. Definition av nivåer med TV-spelsmönster
+        const levels = [
+            // Nivå 1: Klassisk Mario Svamp (12x12)
+            {
+                name: "Svamp", // Dold i UI, bara för intern referens
+                colors: { // Specifik palett för denna nivå
+                    1: commonColors[1],  // Röd
+                    2: commonColors[9],  // Vit
+                    3: commonColors[6],  // Brun
+                    10: commonColors[10] // Svart
+                },
+                pattern: [
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,10,1,1,10,0,0,0,0],
+                    [0,0,0,10,1,1,1,1,10,0,0,0],
+                    [0,0,10,1,1,1,1,1,1,10,0,0],
+                    [0,10,1,1,1,1,1,1,1,1,10,0],
+                    [10,1,1,2,2,2,2,1,1,10,0,0],
+                    [10,1,2,2,2,2,2,2,1,1,10,0],
+                    [10,0,10,3,3,3,3,10,0,0,0,0],
+                    [0,0,0,10,3,3,10,0,0,0,0,0],
+                    [0,0,0,10,3,3,10,0,0,0,0,0], // Extra rad för stammen
+                    [0,0,0,0,10,10,10,0,0,0,0,0], // Botten på stammen
+                    [0,0,0,0,0,0,0,0,0,0,0,0]
+                ],
+                rows: 12,
+                cols: 12,
+                cellSize: 28 // Lite mindre för mer detalj
+            },
+            // Nivå 2: Pac-Man med spökfiende (15x15)
+            {
+                name: "Pac-Man & Ghost",
+                colors: {
+                    1: commonColors[4],  // Gul (Pac-Man)
+                    2: commonColors[10], // Svart (kontur/öga/bakgrund)
+                    3: commonColors[9],  // Vit (öga)
+                    4: commonColors[1],  // Röd (Spöke)
+                    5: commonColors[8]   // Turkost (Spökets ögon)
+                },
+                pattern: [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,2,2,2,2,2,2,0,0,0,0],
+                    [0,0,0,0,2,1,1,1,1,1,1,2,0,0,0],
+                    [0,0,0,2,1,1,1,1,1,1,1,1,2,0,0],
+                    [0,0,2,1,1,1,1,1,1,1,1,1,1,2,0],
+                    [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2],
+                    [2,1,1,1,1,1,1,1,1,1,1,1,1,1,0], // Pac-Man mun
+                    [2,1,1,1,1,1,1,1,1,1,1,2,0,0,0],
+                    [0,2,1,1,1,1,1,1,1,1,1,1,1,1,2],
+                    [0,0,2,1,1,1,1,1,1,1,1,1,1,2,0],
+                    [0,0,0,2,1,1,1,1,1,1,1,1,2,0,0],
+                    [0,0,0,0,2,1,1,1,1,1,1,2,0,0,0],
+                    [0,0,0,0,0,2,2,2,2,2,2,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    // En liten röd spökfiende
+                    [0,0,0,0,0,0,0,0,0,0,0,2,4,4,2],
+                    [0,0,0,0,0,0,0,0,0,0,2,4,4,4,4],
+                    [0,0,0,0,0,0,0,0,0,2,4,4,4,4,2],
+                    [0,0,0,0,0,0,0,0,2,4,4,4,4,2,0],
+                    [0,0,0,0,0,0,0,0,2,4,5,5,4,2,0], /* Spökets ögon */
+                    [0,0,0,0,0,0,0,0,2,4,4,4,4,2,0],
+                    [0,0,0,0,0,0,0,0,2,2,2,2,2,2,0] // Botten på spöket
+                ],
+                rows: 22, // Öka antalet rader för att få plats med spöket
+                cols: 15,
+                cellSize: 20 // Mindre celler för större bild
+            },
+             // Nivå 3: Olika Tetris-bitar (15x15)
+             {
+                name: "Tetris Pussel",
+                colors: {
+                    1: commonColors[1],  // Röd
+                    2: commonColors[4],  // Gul
+                    3: commonColors[3],  // Grön
+                    4: commonColors[2],  // Blå
+                    5: commonColors[7],  // Lila (T-bit)
+                    6: commonColors[8],  // Turkost
+                    10: commonColors[10] // Svart (konturer)
+                },
+                pattern: [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,10,10,1,1,10,0,0,0,0,0,0,0,0], // Röd L-bit
+                    [0,0,0,10,1,10,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,10,1,10,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,10,5,10,0,0,0,0,0], // Lila T-bit
+                    [0,0,0,0,0,10,5,5,5,10,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,10,3,10,0,0,0], // Grön S-bit
+                    [0,0,0,0,0,0,0,10,3,3,10,0,0,0,0],
+                    [0,0,0,0,0,10,3,3,10,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,10,2,2,10,0,0,0,0,0,0,0,0,0], // Blå kvadrat
+                    [0,0,10,2,2,10,0,0,0,0,0,0,0,0,0]
+                ],
+                rows: 15,
+                cols: 15,
+                cellSize: 25
+            },
+             // Nivå 4: Klassisk Pokéboll (20x20) - Mer avancerad
+             {
+                name: "Pokéboll",
+                colors: {
+                    1: commonColors[1],  // Röd
+                    2: commonColors[9],  // Vit
+                    3: commonColors[10]  // Svart
+                },
+                pattern: [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,10,10,10,10,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,10,1,1,1,1,1,1,10,0,0,0,0,0,0,0],
+                    [0,0,0,0,10,1,1,1,1,1,1,1,1,10,0,0,0,0,0,0],
+                    [0,0,0,10,1,1,1,1,1,1,1,1,1,1,10,0,0,0,0,0],
+                    [0,0,10,1,1,1,1,1,1,1,1,1,1,1,1,10,0,0,0,0],
+                    [0,10,1,1,1,1,1,1,1,1,1,1,1,1,1,1,10,0,0,0],
+                    [10,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,10,0,0],
+                    [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,0,0], /* Mittlinjen */
+                    [0,0,0,0,0,0,0,0,10,2,2,10,0,0,0,0,0,0,0,0], /* Knapp */
+                    [0,0,0,0,0,0,0,10,2,2,2,2,10,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,10,2,2,2,2,2,2,10,0,0,0,0,0,0],
+                    [0,0,0,0,0,10,2,2,2,2,2,2,2,2,10,0,0,0,0,0],
+                    [0,0,0,0,10,2,2,2,2,2,2,2,2,2,2,10,0,0,0,0],
+                    [0,0,0,10,2,2,2,2,2,2,2,2,2,2,2,2,10,0,0,0],
+                    [0,0,10,2,2,2,2,2,2,2,2,2,2,2,2,2,2,10,0,0],
+                    [0,10,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,10,0],
+                    [0,0,10,2,2,2,2,2,2,2,2,2,2,2,2,2,2,10,0,0],
+                    [0,0,0,10,2,2,2,2,2,2,2,2,2,2,2,2,10,0,0,0],
+                    [0,0,0,0,10,2,2,2,2,2,2,2,2,2,2,10,0,0,0,0],
+                    [0,0,0,0,0,10,2,2,2,2,2,2,2,2,10,0,0,0,0,0],
+                    [0,0,0,0,0,0,10,2,2,2,2,2,10,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,10,2,2,10,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,10,10,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                ],
+                rows: 28, // Mycket större
+                cols: 20,
+                cellSize: 15 // Väldigt små celler
+            }
+            // Lägg till fler nivåer här för totalt 5
+            /*
+            , {
+                name: "Nivå 5: Sista utmaningen",
+                colors: { ... },
+                pattern: [
+                    [...],
+                    [...]
+                ],
+                rows: X,
+                cols: Y,
+                cellSize: Z
+            }
+            */
+        ];
+
+        let currentLevelIndex = 0;
+        let activeColorNumber = null;
+
+        const colorPaletteEl = document.getElementById('color-palette');
+        const drawingAreaEl = document.getElementById('drawing-area');
+        const levelIndicatorEl = document.getElementById('level-indicator');
+        const prevLevelBtn = document.getElementById('prev-level-btn');
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        const levelCompletionMessageEl = document.getElementById('level-completion-message');
+
+        // Funktion för att skapa färgpaletten för den aktuella nivån
+        function createColorPalette(levelColors) {
+            colorPaletteEl.innerHTML = ''; // Rensa paletten först
+            for (const num in levelColors) {
+                const colorOption = document.createElement('div');
+                colorOption.classList.add('color-option');
+                colorOption.style.backgroundColor = levelColors[num];
+                colorOption.textContent = num;
+                colorOption.dataset.colorNumber = num;
+
+                colorOption.addEventListener('click', () => {
+                    const currentActive = document.querySelector('.color-option.active');
+                    if (currentActive) {
+                        currentActive.classList.remove('active');
+                    }
+                    colorOption.classList.add('active');
+                    activeColorNumber = parseInt(num);
+                });
+                colorPaletteEl.appendChild(colorOption);
+            }
+            // Välj första färgen som standard om det finns färger
+            if (colorPaletteEl.children.length > 0) {
+                colorPaletteEl.children[0].click();
+            } else {
+                activeColorNumber = null; // Ingen färg vald
+            }
+        }
+
+        // Funktion för att skapa målarområdet (rutnätet)
+        function createDrawingArea(pattern, rows, cols, cellSize) {
+            drawingAreaEl.innerHTML = ''; // Rensa målarområdet först
+            drawingAreaEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+            // Justera bredden för att ta hänsyn till border. 2px per kolumn (1px på varje sida)
+            drawingAreaEl.style.width = `${cols * cellSize + (cols * 2)}px`; 
+            drawingAreaEl.style.height = `${rows * cellSize + (rows * 2)}px`; 
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.dataset.expectedColor = pattern[r][c];
+                    cell.style.width = `${cellSize}px`; // Sätt storlek dynamiskt
+                    cell.style.height = `${cellSize}px`; // Sätt storlek dynamiskt
+
+                    if (pattern[r][c] !== 0) { // Visa numret om det inte är en "tom" ruta (0)
+                        cell.textContent = pattern[r][c];
+                    }
+
+                    cell.addEventListener('click', () => {
+                        // Kontrollera om rutan redan är färgad och om den ska vara färgad (inte 0)
+                        if (parseInt(cell.dataset.expectedColor) === 0 || cell.classList.contains('colored')) {
+                            return; // Gör inget om den ska vara tom eller redan är färgad
+                        }
+
+                        // Om den aktiva färgen matchar det förväntade numret för rutan
+                        if (activeColorNumber === parseInt(cell.dataset.expectedColor)) {
+                            // Använd färgen från den aktuella nivåns palett
+                            cell.style.backgroundColor = levels[currentLevelIndex].colors[activeColorNumber];
+                            cell.classList.add('colored'); // Markera som färgad
+                            cell.textContent = ''; // Ta bort siffran
+                            checkLevelCompletion(); // Kontrollera om nivån är klar
+                        } else if (activeColorNumber !== null) {
+                            // Fel färg feedback
+                            cell.style.transition = 'none';
+                            cell.style.backgroundColor = '#FF4500'; // Röd-orange som felindikation
+                            setTimeout(() => {
+                                cell.style.backgroundColor = '';
+                                cell.style.transition = 'background-color 0.05s linear';
+                            }, 150);
+                        }
+                    });
+                    drawingAreaEl.appendChild(cell);
+                }
+            }
+        }
+
+        // Funktion för att ladda en specifik nivå
+        function loadLevel(index) {
+            if (index >= 0 && index < levels.length) {
+                currentLevelIndex = index;
+                const level = levels[currentLevelIndex];
+                
+                levelIndicatorEl.textContent = `Nivå ${currentLevelIndex + 1}`; // Döljer bildnamnet
+                levelCompletionMessageEl.textContent = ""; // Rensa meddelande
+
+                createColorPalette(level.colors);
+                createDrawingArea(level.pattern, level.rows, level.cols, level.cellSize);
+                updateControlButtons();
+            }
+        }
+
+        // Kontrollera om nivån är klar
+        function checkLevelCompletion() {
+            const cells = document.querySelectorAll('#drawing-area .cell');
+            let allColored = true;
+            for (const cell of cells) {
+                // Bara rutor som har ett FÖRVÄNTAT färgvärde (inte 0) måste färgas
+                if (parseInt(cell.dataset.expectedColor) !== 0 && !cell.classList.contains('colored')) {
+                    allColored = false;
+                    break;
+                }
+            }
+
+            if (allColored) {
+                levelCompletionMessageEl.textContent = `🎉 Grattis! Nivå ${currentLevelIndex + 1} klar!`;
+                
+                // Om sista nivån är klar
+                if (currentLevelIndex === levels.length - 1) {
+                    levelCompletionMessageEl.textContent = `🥳 GRATTIS! Du har klarat alla TV-spelsbilder!`;
+                    nextLevelBtn.disabled = true; // Ingen mer att gå till
+                }
+            } else {
+                levelCompletionMessageEl.textContent = ""; // Rensa meddelandet om man ångrar något (inte relevant för nuvarande kod, men bra att ha)
+            }
+        }
+
+        // Uppdatera knapparnas status (aktivera/inaktivera)
+        function updateControlButtons() {
+            prevLevelBtn.disabled = (currentLevelIndex === 0);
+            nextLevelBtn.disabled = (currentLevelIndex === levels.length - 1);
+        }
+
+        // Eventlyssnare för nivånavigering
+        prevLevelBtn.addEventListener('click', () => {
+            if (currentLevelIndex > 0) {
+                loadLevel(currentLevelIndex - 1);
+            }
+        });
+
+        nextLevelBtn.addEventListener('click', () => {
+            if (currentLevelIndex < levels.length - 1) {
+                loadLevel(currentLevelIndex + 1);
+            }
+        });
+
+        // Starta med den första nivån
+        loadLevel(0);
+    </script>
+</body>
+</html>
