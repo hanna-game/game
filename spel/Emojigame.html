@@ -1,95 +1,170 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🎮 Emoji-spelgissning</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background-color: #f0f0f0;
-    }
-    .emoji {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-    #timer {
-      font-size: 1.5rem;
-      color: #e74c3c;
-    }
-    input {
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      margin-top: 1rem;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>🎮 Emoji-spelgissning</title>
+    <style>
+        body {
+            font-family: 'Consolas', 'Monospace', sans-serif; /* Matrix-inspirerad font */
+            text-align: center;
+            padding: 2rem;
+            background-color: #000; /* Svart bakgrund */
+            color: #0f0; /* Grön textfärg */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Säkerställ att body fyller hela viewport-höjden */
+            margin: 0;
+            overflow: hidden; /* För att undvika scrollbars om glödeffekter "sticker ut" */
+        }
+        
+        /* Glödeffekt för rubriker och viktig text */
+        h1, #timer, #result {
+            text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+        }
+
+        .emoji {
+            font-size: 4rem; /* Större emojis */
+            margin-bottom: 1.5rem;
+            color: #fff; /* Vitare färg för emojis för att de ska poppa ut */
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; /* Ljusblå glöd för emojis */
+        }
+        #timer {
+            font-size: 1.8rem; /* Större timer */
+            color: #ff0; /* Gulaktig färg för timer för att sticka ut */
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Stil för input-fält */
+        input {
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            width: 80%; /* Justera bredd */
+            max-width: 300px; /* Max bredd för bättre utseende på stora skärmar */
+            background-color: rgba(0, 50, 0, 0.7); /* Mörkgrön transparent bakgrund */
+            color: #0f0; /* Grön textfärg */
+            border: 2px solid #0f0; /* Grön ram */
+            border-radius: 5px;
+            box-shadow: 0 0 8px #0f0, 0 0 15px #0f0 inset; /* Glödeffekt */
+            outline: none; /* Ta bort standard-outline vid fokus */
+            transition: all 0.2s ease;
+        }
+        input::placeholder {
+            color: rgba(0, 255, 0, 0.5); /* Lättare grön färg för placeholder */
+        }
+        input:focus {
+            box-shadow: 0 0 15px #0f0, 0 0 25px #0f0 inset; /* Starkare glöd vid fokus */
+        }
+
+        /* Stil för knappar */
+        button {
+            padding: 0.8rem 1.8rem;
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            
+            /* Matrix-knappstil */
+            background-color: rgba(0, 70, 0, 0.7); /* Mörkgrön transparent bakgrund */
+            color: #0f0; /* Grön textfärg */
+            border: 2px solid #0f0; /* Grön ram */
+            border-radius: 8px;
+            box-shadow: 0 0 10px #0f0, 0 0 15px #0f0 inset; /* Glödeffekt */
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: rgba(0, 150, 0, 0.9); /* Ljusare grön vid hover */
+            box-shadow: 0 0 20px #0f0, 0 0 30px #0f0, 0 0 40px #0f0 inset; /* Starkare glöd */
+            color: #fff; /* Vit text vid hover */
+            transform: scale(1.05); /* Liten zoom-effekt */
+        }
+        button:active {
+            transform: scale(0.98); /* Liten intryckt effekt vid klick */
+        }
+
+        #result {
+            margin-top: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>🎮 Gissa Spelet med Emojis!</h1>
-  <div class="emoji" id="emoji">🎲</div>
-  <div id="timer">⏳ 20</div>
-  <input type="text" id="guess" placeholder="Skriv spelets namn..." />
-  <br/>
-  <button onclick="checkGuess()">Gissa</button>
-  <p id="result"></p>
-  <button onclick="newGame()">🔄 Ny omgång</button>
+    <h1>🎮 Gissa Spelet med Emojis!</h1>
+    <div class="emoji" id="emoji">🎲</div>
+    <div id="timer">⏳ 20</div>
+    <input type="text" id="guess" placeholder="Skriv spelets namn..." />
+    <br/>
+    <button onclick="checkGuess()">Gissa</button>
+    <p id="result"></p>
+    <button onclick="newGame()">🔄 Ny omgång</button>
 
-  <script>
-    const games = [
-      { emoji: "🕴️🔫🕶️💥🚗🏙️", answer: "GTA V" },
-      { emoji: "🧟‍♂️🎒🔫👧👨", answer: "The Last of Us" },
-      { emoji: "🚗🏁🌄🛞🔥", answer: "Forza Horizon" },
-      { emoji: "🦇🏙️👊🦹‍♂️🔦", answer: "Batman" },
-      { emoji: "👨‍🚀🌌💔🪐🧬", answer: "Mass Effect" }
-    ];
+    <script>
+        const games = [
+            { emoji: "🕴️🔫🕶️💥🚗🏙️", answer: "GTA V" },
+            { emoji: "🧟‍♂️🎒🔫👧👨", answer: "The Last of Us" },
+            { emoji: "🚗🏁🌄🛞🔥", answer: "Forza Horizon" },
+            { emoji: "🦇🏙️👊🦹‍♂️🔦", answer: "Batman" },
+            { emoji: "👨‍🚀🌌💔🪐🧬", answer: "Mass Effect" }
+        ];
 
-    let currentGame;
-    let timeLeft = 20;
-    let timerInterval;
+        let currentGame;
+        let timeLeft = 20;
+        let timerInterval;
 
-    function newGame() {
-      document.getElementById("result").textContent = "";
-      document.getElementById("guess").value = "";
-      timeLeft = 20;
-      clearInterval(timerInterval);
+        function newGame() {
+            document.getElementById("result").textContent = "";
+            document.getElementById("guess").value = "";
+            timeLeft = 20;
+            clearInterval(timerInterval); // Se till att rensa gammal timer
 
-      currentGame = games[Math.floor(Math.random() * games.length)];
-      document.getElementById("emoji").textContent = currentGame.emoji;
+            currentGame = games[Math.floor(Math.random() * games.length)];
+            document.getElementById("emoji").textContent = currentGame.emoji;
 
-      document.getElementById("timer").textContent = `⏳ ${timeLeft}`;
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").textContent = `⏳ ${timeLeft}`;
-        if (timeLeft === 0) {
-          clearInterval(timerInterval);
-          document.getElementById("result").textContent = `⛔ Tiden är ute! Rätt svar var: ${currentGame.answer}`;
+            document.getElementById("timer").textContent = `⏳ ${timeLeft}`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = `⏳ ${timeLeft}`;
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById("result").textContent = `⛔ Tiden är ute! Rätt svar var: ${currentGame.answer}`;
+                    // Optional: Disable input/buttons until new game
+                    // document.getElementById("guess").disabled = true;
+                    // document.querySelector('button[onclick="checkGuess()"]').disabled = true;
+                }
+            }, 1000);
+            // Optional: Re-enable input/buttons when starting new game
+            // document.getElementById("guess").disabled = false;
+            // document.querySelector('button[onclick="checkGuess()"]').disabled = false;
         }
-      }, 1000);
-    }
 
-    function checkGuess() {
-      const userGuess = document.getElementById("guess").value.trim().toLowerCase();
-      if (userGuess && currentGame) {
-        clearInterval(timerInterval);
-        const correct = currentGame.answer.toLowerCase();
-        if (correct.includes(userGuess)) {
-          document.getElementById("result").textContent = "✅ Rätt gissat!";
-        } else {
-          document.getElementById("result").textContent = `❌ Fel! Rätt svar var: ${currentGame.answer}`;
+        function checkGuess() {
+            const userGuess = document.getElementById("guess").value.trim().toLowerCase();
+            if (userGuess && currentGame) { // Lägg till kontroll för currentGame
+                clearInterval(timerInterval);
+                const correct = currentGame.answer.toLowerCase();
+                
+                // Kontrollera om användarens gissning finns i det korrekta svaret
+                // eller om de är exakt lika för bättre flexibilitet
+                if (correct.includes(userGuess) || userGuess === correct) {
+                    document.getElementById("result").textContent = "✅ Rätt gissat!";
+                } else {
+                    document.getElementById("result").textContent = `❌ Fel! Rätt svar var: ${currentGame.answer}`;
+                }
+                // Optional: Disable input/buttons after guess
+                // document.getElementById("guess").disabled = true;
+                // document.querySelector('button[onclick="checkGuess()"]').disabled = true;
+            } else if (!userGuess) {
+                 document.getElementById("result").textContent = "⚠️ Vänligen skriv in en gissning!";
+            }
         }
-      }
-    }
 
-    // Starta första spelet
-    newGame();
-  </script>
+        // Starta första spelet när sidan laddas
+        newGame();
+    </script>
 </body>
 </html>
 
