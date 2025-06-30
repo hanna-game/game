@@ -1,40 +1,122 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <title>🎮 Hanna's Spelportal</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 3rem;
-      background-color: #fafafa;
-    }
-    a {
-      display: inline-block;
-      padding: 1rem 2rem;
-      margin: 1rem;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 1.2rem;
-    }
-    a:hover {
-      background-color: #2980b9;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>🎮 Hannas Spelportal</title>
+    <style>
+        /* CSS för Matrix-bakgrund */
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 3rem;
+            margin: 0;
+            overflow: hidden; /* Dölj scrollbar vid animation */
+            position: relative; /* Nödvändigt för canvaspositionering */
+            color: #fff; /* Vit textfärg för bättre kontrast */
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Placera canvas bakom allt annat innehåll */
+        }
+
+        /* Stil för länkarna och rubriken */
+        .content {
+            position: relative;
+            z-index: 1; /* Se till att innehållet ligger ovanpå canvas */
+        }
+        h1, p {
+            color: #0f0; /* Ljusgrön färg för rubrik och text */
+            text-shadow: 0 0 10px #0f0, 0 0 20px #0f0; /* Glödeffekt */
+        }
+        a {
+            display: inline-block;
+            padding: 1rem 2rem;
+            margin: 1rem;
+            background-color: rgba(52, 152, 219, 0.7); /* Halvtransparent bakgrund */
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease;
+            border: 2px solid #0f0; /* Grön kant */
+            box-shadow: 0 0 10px #0f0; /* Glödeffekt på länkar */
+        }
+        a:hover {
+            background-color: rgba(41, 128, 185, 0.9); /* Mörkare vid hover */
+            box-shadow: 0 0 20px #0f0, 0 0 30px #0f0; /* Mer glöd vid hover */
+        }
+    </style>
 </head>
 <body>
-  <h1>🎮 Välkommen till Jakob's spelsida!</h1>
-  <p>Välj vad du vill göra:</p>
+    <canvas id="matrixCanvas"></canvas>
 
-  <a href="spel/Emojigame.html">Spela Guess the game</a>
-  <a href="spel/food-game.html">Spela Guess the country</a>
-  <a href="spel/brickball.html">Spela BRICK BALL</a><br>
-  <a href="spel/andor-quiz/andor.html">Who are you?</a>
-  <a href="spel/Funfact.html">Fun Facts?</a>
+    <div class="content">
+        <h1>🎮 Välkommen till Jakobs spelsida!</h1>
+        <p>Välj vad du vill göra:</p>
 
+        <a href="spel/Emojigame.html">Spela Guess the game</a>
+        <a href="spel/food-game.html">Spela Guess the country</a>
+        <a href="spel/brickball.html">Spela BRICK BALL</a><br>
+        <a href="spel/andor-quiz/andor.html">Who are you?</a>
+        <a href="spel/Funfact.html">Fun Facts?</a>
+    </div>
+
+    <script>
+        // JavaScript för Matrix-animationen
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ställ in storleken på canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#$%^&*()_+-=~`[]{}\\|:;"\',.<>/?';
+        const columns = Math.floor(canvas.width / 15); // Antal kolumner baserat på teckenstorlek
+        const drops = [];
+
+        // Fyll 'drops'-arrayen med startpositioner
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        // Huvudanimationsloopen
+        function draw() {
+            // Mörkare färg för att få en "trail"-effekt
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#0f0'; // Grön färg för tecknen
+            ctx.font = '15px monospace'; // Monospace-font för att få jämna kolumner
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                const x = i * 15;
+                const y = drops[i] * 15;
+
+                ctx.fillText(text, x, y);
+
+                // Återställ droppen när den når botten eller slumpmässigt
+                if (y > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        // Uppdatera canvas storlek vid fönsterändring
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Starta animationen
+        setInterval(draw, 35);
+    </script>
 </body>
 </html>
 
