@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Färg efter Nummer Målarbok</title>
+    <title>🎨 TV-Spels Målarbok: Färg efter Nummer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Press Start 2P', cursive; /* TV-spelsfont */
             text-align: center;
-            background-color: #f4f4f4;
-            color: #333;
+            background-color: #222; /* Mörk bakgrund */
+            color: #eee; /* Ljus text */
             padding: 20px;
             display: flex;
             flex-direction: column;
@@ -17,86 +18,133 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
+            line-height: 1.5; /* Förbättra läsbarhet för pixel-font */
         }
 
         h1 {
-            color: #2c3e50;
+            color: #4CAF50; /* Grön för TV-spel */
+            text-shadow: 2px 2px 0 #000, 4px 4px 0 #1a1a1a; /* Pixel-skugga */
             margin-bottom: 25px;
+            font-size: 1.8em; /* Anpassa storlek för pixel-font */
+        }
+        h2 {
+            color: #FFEB3B; /* Gul för nivå-indikator */
+            margin-bottom: 20px;
+            font-size: 1.2em;
         }
 
         /* Färgpaletten */
         #color-palette {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            flex-wrap: wrap; /* Låt rutorna bryta rad om det behövs */
+            gap: 10px;
             margin-bottom: 30px;
             padding: 15px;
-            background-color: #fff;
+            background-color: #333;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 2px solid #555;
         }
 
         .color-option {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%; /* Rundade färgalternativ */
+            width: 50px; /* Mindre knappar */
+            height: 50px;
+            border-radius: 8px; /* Fyrkantiga med rundade hörn */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            border: 3px solid transparent; /* Kant som ändras vid aktiv färg */
+            border: 3px solid transparent;
             transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
             font-weight: bold;
-            font-size: 1.1em;
-            color: #fff; /* Färg på siffran */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            font-size: 1.2em;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .color-option:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
 
         .color-option.active {
-            border-color: #3498db; /* Blå kant runt aktiv färg */
+            border-color: #00BCD4; /* Turkos/cyan kant för aktiv färg */
             transform: scale(1.1);
         }
 
         /* Målarområdet (rutnätet) */
         #drawing-area {
             display: grid;
-            /* Detta kommer att sättas av JavaScript beroende på rutans storlek */
-            /* grid-template-columns: repeat(antal_kolumner, storlek_ruta); */
-            border: 2px solid #ccc;
-            background-color: #fff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 5px solid #444; /* Tjockare kant */
+            background-color: #111; /* Mörkare bakgrund i rutan */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
             border-radius: 8px;
-            overflow: hidden; /* För att inte rutorna ska sticka ut */
+            overflow: hidden;
             margin-top: 20px;
+            /* grid-template-columns kommer att sättas av JavaScript */
         }
 
         .cell {
-            width: 30px; /* Standardstorlek på varje ruta */
-            height: 30px;
-            border: 1px solid #eee; /* Tunna gråa linjer mellan rutorna */
+            width: 25px; /* Mindre standardstorlek på varje ruta för mer detaljer */
+            height: 25px;
+            border: 1px solid #333; /* Mörkare tunna linjer */
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 0.9em;
+            font-size: 0.8em;
             font-weight: bold;
             color: #888; /* Färg på siffran i rutan */
             cursor: pointer;
-            transition: background-color 0.1s ease-in-out;
+            transition: background-color 0.05s linear; /* Snabbare transition */
         }
 
         .cell.colored {
             color: transparent; /* Dölj siffran när rutan är färgad */
         }
+
+        /* Nivå-kontroller och meddelanden */
+        #controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        #controls button {
+            background-color: #00796B; /* Mörk turkos */
+            color: white;
+            border: 2px solid #004D40;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        #controls button:hover {
+            background-color: #009688; /* Ljusare turkos */
+            transform: translateY(-2px);
+        }
+        #controls button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        #level-completion-message {
+            margin-top: 25px;
+            font-size: 1.5em;
+            color: #FFC107; /* Orange för seger */
+            text-shadow: 2px 2px 0 #000;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>🎨 Färg efter Nummer Målarbok</h1>
+    <h1>🎨 TV-Spels Målarbok: Färg efter Nummer</h1>
+    <h2 id="level-indicator">Nivå 1</h2>
 
     <div id="color-palette">
         </div>
@@ -104,105 +152,202 @@
     <div id="drawing-area">
         </div>
 
+    <div id="controls">
+        <button id="prev-level-btn" disabled>← Föregående nivå</button>
+        <button id="next-level-btn">Nästa nivå →</button>
+    </div>
+
+    <p id="level-completion-message"></p>
+
     <script>
-        // 1. Definition av färger och mönster
-        const colors = {
-            1: '#FF0000', // Röd
-            2: '#0000FF', // Blå
-            3: '#00FF00', // Grön
-            4: '#FFFF00', // Gul
-            5: '#FFA500', // Orange
-            6: '#800080'  // Lila
+        // 1. Definition av färger för TV-spelstema
+        const gameColors = {
+            1: '#FF0000', // Röd (Mario, eld)
+            2: '#0000FF', // Blå (vatten, blåa block)
+            3: '#00FF00', // Grön (svamp, gräs)
+            4: '#FFFF00', // Gul (mynt, stjärna)
+            5: '#FFA500', // Orange (block, eld)
+            6: '#A52A2A', // Brun (jord, trä)
+            7: '#800080', // Lila (ghosts, power-ups)
+            8: '#008080', // Turkost (vatten, special)
+            9: '#FFFFFF', // Vit (moln, ögon)
+            10: '#000000' // Svart (konturer, tomrum)
         };
 
-        // Definiera ett mönster för "teckningen"
-        // Varje nummer representerar en färg. 0 betyder "tom/ofärgad".
-        // Detta är ett enkelt 10x10 mönster för en "svamp" eller liknande
-        const drawingPattern = [
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,1,1,0,0,0,0],
-            [0,0,0,1,1,1,1,0,0,0],
-            [0,0,1,1,1,1,1,1,0,0],
-            [0,1,1,1,1,1,1,1,1,0],
-            [0,0,0,3,3,3,3,0,0,0],
-            [0,0,3,3,3,3,3,3,0,0],
-            [0,0,3,3,3,3,3,3,0,0],
-            [0,0,0,3,3,3,3,0,0,0],
-            [0,0,0,0,0,0,0,0,0,0]
+        // 2. Definition av nivåer med TV-spelsmönster
+        const levels = [
+            // Nivå 1: Enkel Mario-svamp (10x10)
+            {
+                name: "Mario Svamp (Lätt)",
+                colors: {
+                    1: '#FF0000', // Röd
+                    2: '#FFFFFF', // Vit
+                    3: '#A52A2A', // Brun
+                    10: '#000000' // Svart kontur
+                },
+                pattern: [
+                    [10,10,10,10,10,10,10,10,10,10],
+                    [10,0,0,10,1,1,10,0,0,10],
+                    [10,0,10,1,1,1,1,10,0,10],
+                    [10,10,1,1,1,1,1,1,10,10],
+                    [10,1,1,1,1,1,1,1,1,10],
+                    [10,1,1,2,2,2,2,1,1,10],
+                    [10,1,2,2,2,2,2,2,1,10],
+                    [10,0,10,3,3,3,3,10,0,10],
+                    [10,0,0,10,3,3,10,0,0,10],
+                    [10,10,10,10,10,10,10,10,10,10]
+                ],
+                rows: 10,
+                cols: 10,
+                cellSize: 30
+            },
+            // Nivå 2: Pac-Man (15x15)
+            {
+                name: "Pac-Man (Mellan)",
+                colors: {
+                    1: '#FFFF00', // Gul
+                    2: '#000000', // Svart (bakgrund/öga)
+                    3: '#FFFFFF' // Vit (öga)
+                },
+                pattern: [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0],
+                    [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+                    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0],
+                    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0], /* Denna rad är "munnen" */
+                    [1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+                    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0],
+                    [0,0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+                    [0,0,0,0,0,1,1,1,1,1,1,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                ],
+                rows: 15,
+                cols: 15,
+                cellSize: 25
+            },
+             // Nivå 3: Enkel Tetris-bit (12x12)
+             {
+                name: "Tetris T-bit (Normal)",
+                colors: {
+                    1: '#800080', // Lila (Tetris T-bit färg)
+                    10: '#000000' // Svart kontur
+                },
+                pattern: [
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,10,1,1,10,0,0,0,0],
+                    [0,0,0,10,1,1,1,1,10,0,0,0],
+                    [0,0,0,10,1,1,1,1,10,0,0,0],
+                    [0,0,0,0,10,1,10,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0]
+                ],
+                rows: 12,
+                cols: 12,
+                cellSize: 30
+            }
+            // Lägg till fler nivåer här
+            /*
+            , {
+                name: "Nivå 4: Mer komplex bild",
+                colors: { ... },
+                pattern: [
+                    [...],
+                    [...]
+                ],
+                rows: X,
+                cols: Y,
+                cellSize: Z
+            }
+            */
         ];
 
-        const rows = drawingPattern.length;
-        const cols = drawingPattern[0].length;
-        const cellSize = 30; // Storlek i pixlar för varje ruta
-
-        let activeColorNumber = null; // Det nummer som är aktivt för målning
+        let currentLevelIndex = 0;
+        let activeColorNumber = null;
 
         const colorPaletteEl = document.getElementById('color-palette');
         const drawingAreaEl = document.getElementById('drawing-area');
+        const levelIndicatorEl = document.getElementById('level-indicator');
+        const prevLevelBtn = document.getElementById('prev-level-btn');
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        const levelCompletionMessageEl = document.getElementById('level-completion-message');
 
-        // 2. Skapa färgpaletten
-        function createColorPalette() {
-            for (const num in colors) {
+        // Funktion för att skapa färgpaletten för den aktuella nivån
+        function createColorPalette(levelColors) {
+            colorPaletteEl.innerHTML = ''; // Rensa paletten först
+            for (const num in levelColors) {
                 const colorOption = document.createElement('div');
                 colorOption.classList.add('color-option');
-                colorOption.style.backgroundColor = colors[num];
+                colorOption.style.backgroundColor = levelColors[num];
                 colorOption.textContent = num;
-                colorOption.dataset.colorNumber = num; // Lagra numret som data-attribut
+                colorOption.dataset.colorNumber = num;
 
                 colorOption.addEventListener('click', () => {
-                    // Ta bort 'active' klassen från tidigare vald färg
                     const currentActive = document.querySelector('.color-option.active');
                     if (currentActive) {
                         currentActive.classList.remove('active');
                     }
-                    // Sätt 'active' klassen på den klickade färgen
                     colorOption.classList.add('active');
-                    activeColorNumber = parseInt(num); // Uppdatera aktiv färg
+                    activeColorNumber = parseInt(num);
                 });
                 colorPaletteEl.appendChild(colorOption);
             }
-            // Välj första färgen som standard
-            colorPaletteEl.children[0].click();
+            // Välj första färgen som standard om det finns färger
+            if (colorPaletteEl.children.length > 0) {
+                colorPaletteEl.children[0].click();
+            } else {
+                activeColorNumber = null; // Ingen färg vald
+            }
         }
 
-        // 3. Skapa målarområdet (rutnätet)
-        function createDrawingArea() {
+        // Funktion för att skapa målarområdet för den aktuella nivån
+        function createDrawingArea(pattern, rows, cols, cellSize) {
+            drawingAreaEl.innerHTML = ''; // Rensa målarområdet först
             drawingAreaEl.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
-            drawingAreaEl.style.width = `${cols * cellSize + 2 * (cols - 1)}px`; // Justera bredden med border
-            
+            // Justera bredden för att ta hänsyn till border
+            drawingAreaEl.style.width = `${cols * cellSize + (cols * 2)}px`; // +2px per kolumn för 1px border på varje sida
+
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
                     const cell = document.createElement('div');
                     cell.classList.add('cell');
                     cell.dataset.row = r;
                     cell.dataset.col = c;
-                    cell.dataset.expectedColor = drawingPattern[r][c]; // Lagra vilket nummer den ska ha
+                    cell.dataset.expectedColor = pattern[r][c];
+                    cell.style.width = `${cellSize}px`; // Sätt storlek dynamiskt
+                    cell.style.height = `${cellSize}px`; // Sätt storlek dynamiskt
 
-                    if (drawingPattern[r][c] !== 0) {
-                        cell.textContent = drawingPattern[r][c]; // Visa numret i rutan
+                    if (pattern[r][c] !== 0) {
+                        cell.textContent = pattern[r][c];
                     }
 
                     cell.addEventListener('click', () => {
-                        // Kontrollera om rutan redan är färgad
                         if (cell.classList.contains('colored')) {
-                            return; // Gör inget om den redan är färgad
+                            return;
                         }
 
-                        // Om den aktiva färgen matchar det förväntade numret för rutan
                         if (activeColorNumber === parseInt(cell.dataset.expectedColor)) {
-                            cell.style.backgroundColor = colors[activeColorNumber];
-                            cell.classList.add('colored'); // Markera som färgad
-                            cell.textContent = ''; // Ta bort siffran
+                            cell.style.backgroundColor = levels[currentLevelIndex].colors[activeColorNumber];
+                            cell.classList.add('colored');
+                            cell.textContent = '';
+                            checkLevelCompletion(); // Kontrollera om nivån är klar
                         } else if (activeColorNumber !== null) {
-                            // Feedback om fel färg
-                            console.log(`Fel färg för ruta (${r},${c}). Förväntade ${cell.dataset.expectedColor}, valde ${activeColorNumber}`);
-                            // Du kan lägga till visuell feedback här, t.ex. en röd blixt
-                            cell.style.transition = 'none'; // Stäng av transition temporärt
-                            cell.style.backgroundColor = '#ffcccc'; // Lätt röd som felindikation
+                            // Fel färg feedback
+                            cell.style.transition = 'none';
+                            cell.style.backgroundColor = '#FF4500'; // Röd-orange som felindikation
                             setTimeout(() => {
-                                cell.style.backgroundColor = ''; // Återgå till original
-                                cell.style.transition = 'background-color 0.1s ease-in-out'; // Slå på transition igen
-                            }, 300);
+                                cell.style.backgroundColor = '';
+                                cell.style.transition = 'background-color 0.05s linear';
+                            }, 150);
                         }
                     });
                     drawingAreaEl.appendChild(cell);
@@ -210,9 +355,65 @@
             }
         }
 
-        // Initiera spelet
-        createColorPalette();
-        createDrawingArea();
+        // Funktion för att ladda en specifik nivå
+        function loadLevel(index) {
+            if (index >= 0 && index < levels.length) {
+                currentLevelIndex = index;
+                const level = levels[currentLevelIndex];
+                
+                levelIndicatorEl.textContent = `Nivå ${currentLevelIndex + 1}: ${level.name}`;
+                levelCompletionMessageEl.textContent = ""; // Rensa meddelande
+
+                createColorPalette(level.colors);
+                createDrawingArea(level.pattern, level.rows, level.cols, level.cellSize);
+                updateControlButtons();
+            }
+        }
+
+        // Kontrollera om nivån är klar
+        function checkLevelCompletion() {
+            const cells = document.querySelectorAll('#drawing-area .cell');
+            let allColored = true;
+            for (const cell of cells) {
+                // Bara rutor som har ett förväntat färgvärde (inte 0) måste färgas
+                if (parseInt(cell.dataset.expectedColor) !== 0 && !cell.classList.contains('colored')) {
+                    allColored = false;
+                    break;
+                }
+            }
+
+            if (allColored) {
+                levelCompletionMessageEl.textContent = `🎉 Grattis! Nivå ${currentLevelIndex + 1} klar!`;
+                // Du kan lägga till en animation eller specialeffekt här
+                // Om sista nivån är klar
+                if (currentLevelIndex === levels.length - 1) {
+                    levelCompletionMessageEl.textContent = `🥳 GRATTIS! Du har klarat alla nivåer!`;
+                    nextLevelBtn.disabled = true; // Ingen mer att gå till
+                }
+            }
+        }
+
+        // Uppdatera knapparnas status (aktivera/inaktivera)
+        function updateControlButtons() {
+            prevLevelBtn.disabled = (currentLevelIndex === 0);
+            nextLevelBtn.disabled = (currentLevelIndex === levels.length - 1);
+        }
+
+        // Eventlyssnare för nivånavigering
+        prevLevelBtn.addEventListener('click', () => {
+            if (currentLevelIndex > 0) {
+                loadLevel(currentLevelIndex - 1);
+            }
+        });
+
+        nextLevelBtn.addEventListener('click', () => {
+            if (currentLevelIndex < levels.length - 1) {
+                loadLevel(currentLevelIndex + 1);
+            }
+        });
+
+        // Starta med den första nivån
+        loadLevel(0);
     </script>
 </body>
 </html>
