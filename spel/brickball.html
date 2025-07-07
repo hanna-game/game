@@ -10,24 +10,111 @@
             margin: 0;
             overflow: hidden;
             display: flex; /* Använd flexbox för att centrera canvas */
+            flex-direction: column; /* Allow content below canvas */
             justify-content: center;
             align-items: center;
             min-height: 100vh; /* Säkerställ att body fyller hela viewport-höjden */
+            padding-top: 60px; /* Lägg till padding för att undvika överlappning med knappen */
+            box-sizing: border-box; /* Inkludera padding i höjden */
         }
         canvas {
             display: block;
-            /* Ta bort standard bakgrund, vi ritar den med JS */
-            /* background: #222; */
             border: 5px solid #5A2C00; /* Tjock, brun "jord"-ram */
             border-radius: 10px; /* Rundade hörn på ramen */
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Liten skugga */
         }
+        /* Stil för overlay vid Game Over/Win */
+        #gameOverOverlay {
+            display: none; /* Dold som standard */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute; /* Positionera över canvas */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8); /* Halvtransparent svart */
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #FFD700; /* Gyllene ram */
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+            text-align: center;
+            z-index: 10; /* Ovanför canvas, men under "home-button" */
+            width: 80%; /* Justera vid behov */
+            max-width: 400px;
+            pointer-events: auto; /* Säkerställ klickbarhet för overlay-elementen */
+        }
+        #gameOverOverlay h2 {
+            font-family: 'Press Start 2P', cursive;
+            color: #FFD700;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+        }
+        #gameOverOverlay button {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #FF0000; /* Mario Röd */
+            color: white;
+            border: 2px solid #8B0000;
+            padding: 12px 25px;
+            margin: 10px 5px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            pointer-events: auto; /* Säkerställ att knappar i overlay är klickbara */
+        }
+        #gameOverOverlay button:hover {
+            background-color: #CC0000;
+            transform: translateY(-2px);
+        }
+
+        /* STIL FÖR "HOME"-KNAPPEN */
+        #home-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000; /* Se till att den ligger överst */
+            padding: 10px 15px;
+            background-color: rgba(90, 44, 0, 0.8); /* Brun, transparent */
+            color: white;
+            border: 2px solid #5A2C00; /* Mörkare brun kant */
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            font-family: 'Press Start 2P', cursive; /* Mario-font */
+            pointer-events: auto; /* Säkerställ att den är klickbar */
+        }
+        #home-button:hover {
+            background-color: rgba(120, 58, 0, 0.9);
+            border-color: #FFD700; /* Guldgul kant vid hover */
+        }
     </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="640" height="480"></canvas> <script>
+
+<button id="home-button" onclick="window.location.href = '../index.html'">🏚️ HOME</button>
+
+<canvas id="gameCanvas" width="640" height="480"></canvas>
+
+<div id="gameOverOverlay">
+    <h2 id="gameOverMessage"></h2>
+    <button onclick="restartGame()">SPELA IGEN</button>
+</div>
+
+<script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
+
+    // Overlay-element
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const gameOverMessage = document.getElementById("gameOverMessage");
+
+    // Speltillstånd
+    let gameRunning = true; // Flagga för att kontrollera spellogik
+    let animationFrameId; // För att lagra requestAnimationFrame ID
 
     // Boll (nu en gul Super Star)
     let x = canvas.width / 2;
@@ -36,7 +123,7 @@
     let dy = -3; // Öka hastigheten lite
     const ballRadius = 12; // Större boll
 
-    // Paddle (Mario-röd)
+    // Paddel (Mario-röd)
     const paddleHeight = 15; // Tjockare paddel
     const paddleWidth = 100; // Bredare paddel
     let paddleX = (canvas.width - paddleWidth) / 2;
@@ -102,18 +189,18 @@
                         b.hitCount++; // Öka träffräknaren
 
                         // Olika HP för tegelstenar
-                        if (b.status === 1) { // Standard tegelsten
+                        if (b.status === 1) { // Standardblock
                             b.status = 0;
                             score += 10; // Poäng för att förstöra block
-                        } else if (b.status === 2 && b.hitCount >= 1) { // Starkare tegelsten
+                        } else if (b.status === 2 && b.hitCount >= 1) { // Starkare block
                              b.status = 0;
                              score += 20;
                         }
                         // Du kan lägga till fler "HP" nivåer för tegelstenarna här
 
                         if (score === brickRowCount * brickColumnCount * 10) { // Poäng för att vinna baserat på nya poängen
-                            alert("🎉 GRATTIS! DU VANN SUPER MARIO BRICK BREAKER!");
-                            document.location.reload();
+                            endGame("🎉 GRATTIS! DU VANN SUPER MARIO BRICK BREAKER!");
+                            return; // Stoppa vidare kollisionskontroller om spelet vanns
                         }
                     }
                 }
@@ -216,6 +303,8 @@
     }
 
     function draw() {
+        if (!gameRunning) return; // Stoppa ritning om spelet inte körs
+
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Rensa canvas
         drawBackground(); // Rita bakgrunden först
         drawBricks();
@@ -240,8 +329,8 @@
             } else {
                 lives--; // Förlora ett liv
                 if (lives === 0) {
-                    alert("GAME OVER! Mario förlorade sina liv!");
-                    document.location.reload();
+                    endGame("💥 GAME OVER! Mario förlorade sina liv!");
+                    return; // Stoppa spellogik direkt efter game over
                 } else {
                     // Återställ boll och paddel
                     x = canvas.width / 2;
@@ -262,13 +351,44 @@
 
         x += dx;
         y += dy;
-        requestAnimationFrame(draw);
+        animationFrameId = requestAnimationFrame(draw);
     }
 
-    // Initiera vissa tegelstenar med högre "HP" (status 2)
+    // Funktion för att avsluta spelet och visa overlay
+    function endGame(message) {
+        gameRunning = false;
+        cancelAnimationFrame(animationFrameId); // Stoppa animationloopen
+        gameOverMessage.textContent = message;
+        gameOverOverlay.style.display = 'flex'; // Visa overlay
+    }
+
+    // Funktion för att starta om spelet
+    function restartGame() {
+        gameOverOverlay.style.display = 'none'; // Dölj overlay
+        gameRunning = true;
+        // Återställ spelvariabler
+        x = canvas.width / 2;
+        y = canvas.height - 50;
+        dx = 3;
+        dy = -3;
+        paddleX = (canvas.width - paddleWidth) / 2;
+        score = 0;
+        lives = 3;
+        
+        // Återställ tegelstenar
+        for (let c = 0; c < brickColumnCount; c++) {
+            for (let r = 0; r < brickRowCount; r++) {
+                bricks[c][r].status = (r % 2 === 0) ? 1 : 2; // Initiera om som tidigare
+                bricks[c][r].hitCount = 0;
+            }
+        }
+        draw(); // Starta spellogiken igen
+    }
+
+    // Initiera vissa tegelstenar med högre "HP" (status 2) vid spelets start
     for (let c = 0; c < brickColumnCount; c++) {
         for (let r = 0; r < brickRowCount; r++) {
-            if (r % 2 === 0) { // Varannan rad får status 2
+            if (r % 2 === 0) {
                 bricks[c][r].status = 1;
             } else {
                 bricks[c][r].status = 2; // Dessa block kräver 2 träffar
