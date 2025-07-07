@@ -6,11 +6,12 @@
   <title>🎮 Emoji-spelgissning</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Förbättrad font */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
       padding: 2rem;
-      background-color: #000; /* Svart bakgrund */
-      color: #0f0; /* Grön textfärg */
+      padding-top: 60px; /* Lägg till padding för att undvika överlappning med knappen */
+      background-color: #000;
+      color: #0f0;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -20,68 +21,64 @@
       overflow: hidden;
     }
     
-    /* Glödeffekt för rubriker och viktig text */
     h1, #timer, #result {
       text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
     }
 
     .emoji {
-      font-size: 4rem; /* Större emojis */
+      font-size: 4rem;
       margin-bottom: 1.5rem;
-      color: #fff; /* Vitare färg för emojis för att de ska poppa ut */
-      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; /* Ljusblå glöd för emojis */
+      color: #fff;
+      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
     }
     #timer {
-      font-size: 1.8rem; /* Större timer */
-      color: #ff0; /* Gulaktig färg för timer för att sticka ut */
+      font-size: 1.8rem;
+      color: #ff0;
       margin-bottom: 1.5rem;
     }
     
-    /* Stil för input-fält */
     input {
       padding: 0.8rem;
       font-size: 1.1rem;
-      width: 80%; /* Justera bredd */
-      max-width: 300px; /* Max bredd för bättre utseende på stora skärmar */
-      background-color: rgba(0, 50, 0, 0.7); /* Mörkgrön transparent bakgrund */
-      color: #0f0; /* Grön textfärg */
-      border: 2px solid #0f0; /* Grön ram */
+      width: 80%;
+      max-width: 300px;
+      background-color: rgba(0, 50, 0, 0.7);
+      color: #0f0;
+      border: 2px solid #0f0;
       border-radius: 5px;
-      box-shadow: 0 0 8px #0f0, 0 0 15px #0f0 inset; /* Glödeffekt */
-      outline: none; /* Ta bort standard-outline vid fokus */
+      box-shadow: 0 0 8px #0f0, 0 0 15px #0f0 inset;
+      outline: none;
       transition: all 0.2s ease;
     }
     input::placeholder {
-      color: rgba(0, 255, 0, 0.5); /* Lättare grön färg för placeholder */
+      color: rgba(0, 255, 0, 0.5);
     }
     input:focus {
-      box-shadow: 0 0 15px #0f0, 0 0 25px #0f0 inset; /* Starkare glöd vid fokus */
+      box-shadow: 0 0 15px #0f0, 0 0 25px #0f0 inset;
     }
 
-    /* Stil för knappar */
-    .game-button { /* Ny klass för spelknappar */
+    .game-button {
       padding: 0.8rem 1.8rem;
       font-size: 1.1rem;
       margin-top: 1.5rem;
       cursor: pointer;
       
-      /* Matrix-knappstil */
-      background-color: rgba(0, 70, 0, 0.7); /* Mörkgrön transparent bakgrund */
-      color: #0f0; /* Grön textfärg */
-      border: 2px solid #0f0; /* Grön ram */
+      background-color: rgba(0, 70, 0, 0.7);
+      color: #0f0;
+      border: 2px solid #0f0;
       border-radius: 8px;
-      box-shadow: 0 0 10px #0f0, 0 0 15px #0f0 inset; /* Glödeffekt */
+      box-shadow: 0 0 10px #0f0, 0 0 15px #0f0 inset;
       font-weight: bold;
       transition: all 0.3s ease;
     }
     .game-button:hover {
-      background-color: rgba(0, 150, 0, 0.9); /* Ljusare grön vid hover */
-      box-shadow: 0 0 20px #0f0, 0 0 30px #0f0, 0 0 40px #0f0 inset; /* Starkare glöd */
-      color: #fff; /* Vit text vid hover */
-      transform: scale(1.05); /* Liten zoom-effekt */
+      background-color: rgba(0, 150, 0, 0.9);
+      box-shadow: 0 0 20px #0f0, 0 0 30px #0f0, 0 0 40px #0f0 inset;
+      color: #fff;
+      transform: scale(1.05);
     }
     .game-button:active {
-      transform: scale(0.98); /* Liten intryckt effekt vid klick */
+      transform: scale(0.98);
     }
 
     #result {
@@ -95,7 +92,7 @@
       position: fixed;
       top: 20px;
       right: 20px;
-      z-index: 1000;
+      z-index: 1000; /* Se till att den ligger överst */
       padding: 10px 15px;
       background-color: rgba(50, 50, 50, 0.8);
       color: white;
@@ -103,8 +100,9 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 0.9rem;
-      text-decoration: none; /* If it's an <a> tag */
+      text-decoration: none;
       transition: background-color 0.2s ease, border-color 0.2s ease;
+      pointer-events: auto; /* Säkerställ att den är klickbar */
     }
     #home-button:hover {
       background-color: rgba(70, 70, 70, 0.9);
@@ -114,7 +112,7 @@
 </head>
 <body>
 
-    <button id="home-button" onclick="https://hanna-game.github.io/game/">🏚️ HOME</button>
+    <button id="home-button" onclick="window.location.href = '../index.html'">⬅️ Till Huvudportalen</button>
 
   <h1>🎮 Gissa Spelet med Emojis!</h1>
   <div class="emoji" id="emoji">🎲</div>
@@ -178,4 +176,3 @@
   </script>
 </body>
 </html>
-
