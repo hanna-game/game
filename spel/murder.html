@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ The Mystery at Wildrose Manor</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #1a1a1a; /* Dark, mysterious background */
+            color: #e0e0e0; /* Light text color */
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background-color: #2b2b2b; /* Darker panel for the game */
+            border: 2px solid #555;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            text-align: left;
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        h1 {
+            color: #d4af37; /* Golden color for the title */
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+        }
+
+        #game-text {
+            background-color: #3a3a3a;
+            border: 1px solid #444;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            min-height: 150px; /* Ensure height */
+            line-height: 1.6;
+        }
+
+        .choices button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            background-color: #4a4a4a;
+            color: #e0e0e0;
+            border: 1px solid #666;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            text-align: left; /* Text left-aligned */
+        }
+
+        .choices button:hover {
+            background-color: #6a6a6a;
+            color: #fff;
+            border-color: #d4af37; /* Golden border on hover */
+        }
+        .choices button:disabled {
+            background-color: #333;
+            color: #888;
+            border-color: #444;
+            cursor: not-allowed;
+        }
+
+        #inventory {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #3a3a3a;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+
+        #inventory h3 {
+            color: #d4af37;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #evidence-list li {
+            margin-bottom: 5px;
+            list-style-type: disc;
+            margin-left: 20px;
+            color: #b0e0e6; /* Light blue for clues */
+        }
+        #suspect-list li {
+            margin-bottom: 5px;
+            list-style-type: circle;
+            margin-left: 20px;
+            color: #ffb6c1; /* Light pink for interrogated suspects */
+        }
+
+        #guess-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #555;
+            text-align: center;
+        }
+        #guess-section p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        #guess-section select {
+            padding: 8px;
+            font-size: 1em;
+            background-color: #4a4a4a;
+            color: #e0e0e0;
+            border: 1px solid #666;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        #guess-section button {
+            padding: 10px 20px;
+            background-color: #d4af37; /* Golden guess button */
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        #guess-section button:hover {
+            background-color: #f0c24f;
+            transform: translateY(-2px);
+        }
+        #guess-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>🕵️‍♂️ The Mystery at Wildrose Manor</h1>
+
+        <div id="game-text">
+            Welcome to Wildrose Manor. Mr. Green, the renowned collector, has been found murdered in his library.
+            It's your task to solve the case. Time is running out, and suspicions are spreading fast.
+            What do you want to do first?
+        </div>
+
+        <div class="choices" id="game-choices">
+            </div>
+
+        <div id="inventory">
+            <h3>Your Clues:</h3>
+            <ul id="evidence-list">
+                <li>Detective's Notebook (empty)</li>
+            </ul>
+            <h3>Interrogated Suspects:</h3>
+            <ul id="suspect-list">
+                </ul>
+        </div>
+
+        <div id="guess-section">
+            <p>When you are ready, make your accusation:</p>
+            <select id="suspect-select">
+                </select>
+            <button onclick="makeGuess()">Accuse Suspect</button>
+            <p id="guess-result"></p>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const suspects = {
+            "Mrs. Blue": {
+                name: "Mrs. Blue",
+                description: "Mr. Green's loyal housekeeper. Seems shocked but composed.",
+                evidence: ["She had an argument with Mr. Green about a stolen vase last week.", "Her gloves are spotless."],
+                dialogue: [
+                    "I cannot believe it! Mr. Green was a kind man, despite his little quirks.",
+                    "I saw nothing unusual last night. I went to bed early."
+                ],
+                isGuilty: false, // Change to true to test if she is guilty
+                interrogated: false
+            },
+            "Dr. Red": {
+                name: "Dr. Red",
+                description: "A prominent but hot-headed collector. He had a business dinner with Mr. Green the night before.",
+                evidence: ["A threatening letter from Dr. Red was found in Green's study.", "His shoes have mud from the garden, despite claiming he wasn't there."],
+                dialogue: [
+                    "Green was an idiot! He tried to swindle me out of that rare coin. But I would never kill anyone.",
+                    "I was at home after our dinner. I have witnesses!"
+                ],
+                isGuilty: true, // The guilty party in this example
+                interrogated: false
+            },
+            "Nephew Black": {
+                name: "Nephew Black",
+                description: "Mr. Green's nephew. He was recently removed from the will.",
+                evidence: ["He has significant gambling debts.", "A broken artifact matching an object from the library was found in the garden."],
+                dialogue: [
+                    "Uncle Green was a stingy old miser! But I would never have killed him, I had nothing to gain from it.",
+                    "I was out with friends last night. The whole evening."
+                ],
+                isGuilty: false,
+                interrogated: false
+            }
+        };
+
+        const locations = {
+            "The Library": {
+                description: "The crime scene. Mr. Green lies motionless at his desk. The blood has dried.",
+                clues: ["A shattered glass on the floor", "An empty wine bottle under the table", "A mysterious crumpled note with scribbles"],
+                examined: false
+            },
+            "The Entrance Hall": {
+                description: "The main entrance to the manor. Quiet and empty. It appears someone left in a hurry.",
+                clues: ["An umbrella is missing from the stand", "Muddy footprints leading out the door"],
+                examined: false
+            },
+            "The Garden": {
+                description: "The garden is beautiful but appears to have been disturbed near the library window.",
+                clues: ["Uprooted plants beneath the library window", "A small piece of metal that looks like it's from a tool of some kind"],
+                examined: false
+            }
+        };
+
+        let currentScene = "start"; // Starting scene
+        let collectedEvidence = new Set(); // Using Set for unique clues
+        let interrogatedSuspects = new Set(); // To keep track of interrogated suspects
+
+        const gameTextEl = document.getElementById("game-text");
+        const gameChoicesEl = document.getElementById("game-choices");
+        const evidenceListEl = document.getElementById("evidence-list");
+        const suspectListEl = document.getElementById("suspect-list");
+        const suspectSelectEl = document.getElementById("suspect-select");
+        const guessResultEl = document.getElementById("guess-result");
+
+        // Initialize game
+        function initGame() {
+            // Populate the suspect dropdown for accusation
+            for (const key in suspects) {
+                const option = document.createElement("option");
+                option.value = key;
+                option.textContent = suspects[key].name;
+                suspectSelectEl.appendChild(option);
+            }
+            // Start the first scene
+            renderScene(currentScene);
+        }
+
+        // Renders the current game scene and choices
+        function renderScene(sceneId) {
+            gameChoicesEl.innerHTML = ''; // Clear old choices
+            guessResultEl.textContent = ''; // Clear old guess results
+
+            if (sceneId === "start") {
+                gameTextEl.innerHTML = `
+                    Welcome to Wildrose Manor. Mr. Green, the renowned collector, has been found murdered in his library.
+                    It's your task to solve the case. Time is running out, and suspicions are spreading fast.
+                    What do you want to do first?
+                `;
+                addChoice("Investigate the Crime Scene (The Library)", () => renderScene("The Library"));
+                addChoice("Interrogate Suspects", () => renderScene("interrogate_start"));
+                addChoice("Explore Other Locations", () => renderScene("explore_start"));
+                addChoice("Make an Accusation", () => {
+                    gameTextEl.textContent = "Are you sure you want to make an accusation now? You cannot go back afterwards.";
+                    addChoice("Yes, I'm ready to accuse!", () => { /* Logic to show guess section, already visible */ });
+                    addChoice("No, I want to investigate more", () => renderScene("start"));
+                });
+
+            } else if (sceneId.startsWith("interrogate_")) {
+                handleInterrogationScene(sceneId);
+            } else if (sceneId.startsWith("explore_")) {
+                handleLocationScene(sceneId);
+            } else if (locations[sceneId]) { // If it's a specific location to investigate
+                exploreLocation(sceneId);
+            }
+        }
+
+        // Handles interrogation scenes
+        function handleInterrogationScene(sceneId) {
+            gameTextEl.innerHTML = "Who do you want to interrogate?";
+            // List suspects to interrogate
+            for (const key in suspects) {
+                const suspect = suspects[key];
+                addChoice(`Interrogate ${suspect.name} ${suspect.interrogated ? "(Interrogated)" : ""}`, () => {
+                    interrogateSuspect(key);
+                }, suspect.interrogated); // Disable if already interrogated
+            }
+            addChoice("Go back to Main Menu", () => renderScene("start"));
+        }
+
+        // Interrogate a specific suspect
+        function interrogateSuspect(suspectName) {
+            const suspect = suspects[suspectName];
+            gameTextEl.innerHTML = `You interrogate ${suspect.name}: "${suspect.dialogue[Math.floor(Math.random() * suspect.dialogue.length)]}" <br><br> ${suspect.description}`;
+            
+            // Collect evidence from the interrogation
+            suspect.evidence.forEach(clue => {
+                if (!collectedEvidence.has(clue)) {
+                    collectedEvidence.add(clue);
+                    updateInventory();
+                }
+            });
+            suspect.interrogated = true; // Mark as interrogated
+            updateInterrogatedSuspectsList(); // Update the list
+            addChoice("Ask another question (or finish interrogation)", () => renderScene("interrogate_start"));
+        }
+
+        // Handles location exploration scenes
+        function handleLocationScene(sceneId) {
+            gameTextEl.innerHTML = "Which location do you want to explore?";
+            for (const key in locations) {
+                const location = locations[key];
+                addChoice(`Explore ${location.name} ${location.examined ? "(Examined)" : ""}`, () => {
+                    exploreLocation(key);
+                }, location.examined); // Disable if already examined
+            }
+            addChoice("Go back to Main Menu", () => renderScene("start"));
+        }
+
+        // Explore a specific location
+        function exploreLocation(locationName) {
+            const location = locations[locationName];
+            gameTextEl.innerHTML = `You explore ${location.name}: "${location.description}"`;
+            
+            // Collect clues from the location
+            location.clues.forEach(clue => {
+                if (!collectedEvidence.has(clue)) {
+                    collectedEvidence.add(clue);
+                    updateInventory();
+                }
+            });
+            location.examined = true; // Mark as examined
+            addChoice("Go back to Location Choices", () => renderScene("explore_start"));
+        }
+
+        // Adds a choice button to the UI
+        function addChoice(text, callback, disabled = false) {
+            const button = document.createElement("button");
+            button.textContent = text;
+            button.onclick = callback;
+            button.disabled = disabled;
+            gameChoicesEl.appendChild(button);
+        }
+
+        // Updates the evidence list in the inventory
+        function updateInventory() {
+            evidenceListEl.innerHTML = '';
+            if (collectedEvidence.size === 0) {
+                evidenceListEl.innerHTML = '<li>No specific clues yet.</li>';
+            } else {
+                collectedEvidence.forEach(clue => {
+                    const li = document.createElement("li");
+                    li.textContent = clue;
+                    evidenceListEl.appendChild(li);
+                });
+            }
+        }
+
+        // Updates the list of interrogated suspects
+        function updateInterrogatedSuspectsList() {
+            suspectListEl.innerHTML = '';
+            let foundInterrogated = false;
+            for (const key in suspects) {
+                if (suspects[key].interrogated) {
+                    const li = document.createElement("li");
+                    li.textContent = suspects[key].name;
+                    suspectListEl.appendChild(li);
+                    foundInterrogated = true;
+                }
+            }
+            if (!foundInterrogated) {
+                suspectListEl.innerHTML = '<li>No suspects interrogated yet.</li>';
+            }
+        }
+
+        // Player makes an accusation
+        function makeGuess() {
+            const selectedSuspectName = suspectSelectEl.value;
+            const guessedSuspect = suspects[selectedSuspectName];
+
+            if (guessedSuspect.isGuilty) {
+                guessResultEl.style.color = "#4CAF50"; // Green color
+                guessResultEl.innerHTML = `🥳 CONGRATULATIONS! You have solved the case! ${guessedSuspect.name} was the culprit!`;
+            } else {
+                guessResultEl.style.color = "#FF4500"; // Red color
+                guessResultEl.innerHTML = `❌ Too bad, ${guessedSuspect.name} was not the culprit. The case remains unsolved!`;
+            }
+            // Disable further play after accusation (you can add a "Restart" button here)
+            gameChoicesEl.innerHTML = '';
+            addChoice("Restart Game", () => document.location.reload());
+            document.getElementById("guess-section").querySelector('button').disabled = true;
+            suspectSelectEl.disabled = true;
+        }
+
+        // Initialize UI on start
+        initGame();
+        updateInventory(); // Update on start (show empty inventory)
+        updateInterrogatedSuspectsList(); // Update on start
+    </script>
+</body>
+</html>
