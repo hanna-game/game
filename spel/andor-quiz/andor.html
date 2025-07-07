@@ -11,6 +11,7 @@
             background-color: #1a1a1a; /* Mörk rymdbakgrund */
             color: #e0e0e0; /* Ljus grå textfärg */
             padding: 20px;
+            padding-top: 60px; /* Lägg till padding för att undvika överlappning med knappen */
             max-width: 700px; /* Bredd för att rymma innehållet bättre */
             margin: auto;
             text-align: center; /* Centrera allt innehåll */
@@ -18,6 +19,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            box-sizing: border-box; /* Se till att padding inkluderas i höjden */
         }
         
         /* Rubrikstil med Star Wars-känsla */
@@ -44,4 +46,227 @@
             font-size: 1.6em;
             color: #00ffcc; /* Cyan/blågrön för frågor, liknar holografisk text */
             margin-bottom: 20px;
-            text-shadow: 0 0 8px rgba(0,
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+        }
+
+        /* Svarsknappar */
+        .answers button {
+            display: block;
+            width: 90%; /* Lite smalare knappar */
+            margin: 10px auto; /* Centrera knappar */
+            padding: 15px 20px;
+            font-size: 1.1em;
+            
+            background: #3a3a3a; /* Mörkare grå bakgrund */
+            color: #ffe81f; /* Star Wars-gul text */
+            border: 2px solid #ffe81f; /* Gul ram */
+            border-radius: 8px;
+            cursor: pointer;
+            
+            box-shadow: 0 0 8px rgba(255, 232, 31, 0.4); /* Subtil gul glöd */
+            transition: all 0.3s ease; /* Mjuka övergångar */
+            text-transform: uppercase; /* Stora bokstäver */
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        .answers button:hover {
+            background: #4a4a4a; /* Lättare grå vid hover */
+            color: #fff; /* Vit text vid hover */
+            border-color: #fff; /* Vit ram vid hover */
+            box-shadow: 0 0 15px rgba(255, 232, 31, 0.7), 0 0 25px rgba(255, 232, 31, 0.5); /* Intensivare glöd */
+            transform: translateY(-2px); /* Liten upp-effekt */
+        }
+        .answers button:active {
+            transform: translateY(0);
+            box-shadow: 0 0 5px rgba(255, 232, 31, 0.3); /* Mindre glöd vid klick */
+        }
+
+        /* Resultatsektion */
+        #result {
+            text-align: center;
+            font-size: 1.8em;
+            margin-top: 40px;
+            color: #00ffcc; /* Cyan för resultattext */
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+        }
+        #result strong {
+            color: #ffe81f; /* Gult för karaktärsnamnet */
+            text-shadow: 0 0 10px rgba(255, 232, 31, 0.7);
+        }
+        #result img {
+            width: 250px; /* Större bilder */
+            height: 250px; /* För att hålla proportionerna */
+            object-fit: cover; /* Säkerställer att bilden täcker ytan utan att deformeras */
+            margin-top: 25px;
+            border-radius: 50%; /* Rund bild för en mer "medaljong"-effekt */
+            border: 5px solid #ffe81f; /* Gul ram runt bilden */
+            box-shadow: 0 0 20px rgba(255, 232, 31, 0.8), 0 0 40px rgba(255, 232, 31, 0.5); /* Intensiv glöd */
+        }
+        
+        /* Dölj ljudelementet men tillåt uppspelning */
+        audio {
+            display: none;
+        }
+
+        /* STIL FÖR "HOME"-KNAPPEN */
+        #home-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000; /* Se till att den ligger överst */
+            padding: 10px 15px;
+            background-color: rgba(58, 58, 58, 0.8); /* Mörkgrå, transparent */
+            color: #eee;
+            border: 2px solid #666;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            font-family: 'Exo 2', sans-serif; /* Använd samma font */
+            text-transform: uppercase;
+            pointer-events: auto; /* Säkerställ att den är klickbar */
+        }
+        #home-button:hover {
+            background-color: rgba(74, 74, 74, 0.9);
+            border-color: #ffe81f; /* Star Wars-gul vid hover */
+            color: #ffe81f;
+        }
+    </style>
+</head>
+<body>
+
+<button id="home-button" onclick="window.location.href = '../../index.html'">🏚️ HOME</button>
+
+<h1>Vilken Andor-karaktär är du?</h1>
+<audio id="bgMusic" autoplay loop>
+    <source src="musik/andor-theme.mp3" type="audio/mpeg">
+    Din webbläsare stödjer inte ljud.
+</audio>
+
+<div id="quiz"></div>
+<div id="result"></div>
+
+<script>
+const questions = [
+    {
+        text: "Hur hanterar du du stress?",
+        options: [
+            { text: "Jag fokuserar och agerar snabbt", character: "Cassian" },
+            { text: "Jag spelar schack i huvudet", character: "Luthen" },
+            { text: "Jag pratar med folk jag litar på", character: "Mon Mothma" },
+            { text: "Jag biter ihop och jobbar hårdare", character: "Bix" },
+            { text: "Jag försöker kontrollera situationen", character: "Dedra" }
+        ]
+    },
+    {
+        text: "Hur ser du på auktoritet?",
+        options: [
+            { text: "Det är något man utmanar", character: "Cassian" },
+            { text: "Ett verktyg att använda", character: "Luthen" },
+            { text: "Det behövs för ordning", character: "Mon Mothma" },
+            { text: "Det är ofta orättvist", character: "Bix" },
+            { text: "Jag är auktoriteten", character: "Dedra" }
+        ]
+    },
+    {
+        text: "Vad är viktigast för dig?",
+        options: [
+            { text: "Frihet", character: "Cassian" },
+            { text: "Syftet", character: "Luthen" },
+            { text: "Moral", character: "Mon Mothma" },
+            { text: "Människor omkring mig", character: "Bix" },
+            { text: "Framgång", character: "Dedra" }
+        ]
+    },
+    {
+        text: "Hur beskriver dina vänner dig?",
+        options: [
+            { text: "Tyst men lojal", character: "Cassian" },
+            { text: "Hemlighetsfull", character: "Luthen" },
+            { text: "Diplomatisk och smart", character: "Mon Mothma" },
+            { text: "Tuff och pålitlig", character: "Bix" },
+            { text: "Driven och bestämd", character: "Dedra" }
+        ]
+    },
+    {
+        text: "Om du var i motståndsrörelsen, vad skulle du göra?",
+        options: [
+            { text: "Slåss på frontlinjen", character: "Cassian" },
+            { text: "Planera i skuggorna", character: "Luthen" },
+            { text: "Samla politiskt stöd", character: "Mon Mothma" },
+            { text: "Skydda min stad", character: "Bix" },
+            { text: "Stoppa dem (jag är med Imperiet)", character: "Dedra" }
+        ]
+    }
+];
+
+let currentQuestion = 0;
+const scores = {
+    "Cassian": 0,
+    "Luthen": 0,
+    "Mon Mothma": 0,
+    "Bix": 0,
+    "Dedra": 0
+};
+
+// Se till att bilderna ligger i samma mapp som din HTML-fil (eller ange korrekt sökväg)
+const characterImages = {
+    "Cassian": "cassian.jpg",
+    "Luthen": "luthen.jpg",
+    "Mon Mothma": "monmothma.jpg",
+    "Bix": "bix.jpg",
+    "Dedra": "dedra.jpg"
+};
+
+const quizEl = document.getElementById("quiz");
+const resultEl = document.getElementById("result");
+
+function showQuestion() {
+    const q = questions[currentQuestion];
+    quizEl.innerHTML = `
+        <div class="question">
+            <h3>${q.text}</h3>
+            <div class="answers">
+                ${q.options.map(opt => `<button onclick="selectAnswer('${opt.character}')">${opt.text}</button>`).join("")}
+            </div>
+        </div>
+    `;
+}
+
+function selectAnswer(character) {
+    scores[character]++;
+    currentQuestion++;
+    if (currentQuestion < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult() {
+    quizEl.innerHTML = "";
+    let topCharacter = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+    resultEl.innerHTML = `
+        <p>🧠 Du är mest lik <strong>${topCharacter}</strong>!</p>
+        <img src="${characterImages[topCharacter]}" alt="${topCharacter}">
+        <button onclick="restartQuiz()" style="margin-top: 30px; background-color: #3a3a3a; border-color: #ffe81f; color: #ffe81f;">🔄 Starta om Quiz</button>
+    `;
+}
+
+// Funktion för att starta om quizet
+function restartQuiz() {
+    currentQuestion = 0;
+    for (const char in scores) {
+        scores[char] = 0;
+    }
+    resultEl.innerHTML = ""; // Rensa resultat
+    showQuestion(); // Visa första frågan igen
+}
+
+// Starta quizet när sidan laddas
+showQuestion();
+</script>
+
+</body>
+</html>
